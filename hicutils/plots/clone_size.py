@@ -188,6 +188,7 @@ def plot_ranges(
         df,
         pool,
         intervals=(10, 100, 1000),
+        order_func=None,
         **kwargs):
     intervals = [0, *intervals]
     portions = []
@@ -218,16 +219,19 @@ def plot_ranges(
         )
     )
 
-    d20s = list(
-        df
-        .groupby(pool).apply(_get_d, 20)
-        .sort_values(ascending=False)
-        .index
-    )
-    pdf['order'] = [
-        d20s.index(label.rsplit(' (')[0]) for label in pdf.index
-    ]
-    pdf = pdf.sort_values('order').drop('order', axis=1)
+    if order_func:
+        pdf = order_func(pdf)
+    else:
+        d20s = list(
+            df
+            .groupby(pool).apply(_get_d, 20)
+            .sort_values(ascending=False)
+            .index
+        )
+        pdf['order'] = [
+            d20s.index(label.rsplit(' (', 1)[0]) for label in pdf.index
+        ]
+        pdf = pdf.sort_values('order').drop('order', axis=1)
 
     colors = [
         *kwargs.pop('color', sns.color_palette()[:len(intervals) - 1]),

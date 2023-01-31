@@ -140,8 +140,8 @@ def plot_cdr3_spectratype(df, color_top=10, **kwargs):
         hue='cdr3_aa',
         kind='bar',
         dodge=False,
-        height=kwargs.get('height', 6),
-        aspect=kwargs.get('aspect', 2),
+        height=kwargs.pop('height', 6),
+        aspect=kwargs.pop('aspect', 2),
         legend=False,
         errorbar=None,
         palette=colors
@@ -156,3 +156,48 @@ def plot_cdr3_spectratype(df, color_top=10, **kwargs):
     plt.legend(loc='upper right')
 
     return g, cdf
+
+
+def plot_cdr3_distribution(df, pool, size_metric='clones', **kwargs):
+    '''
+    Plots CDR3 length distribution.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to use for plotting CDR3 length.
+    pool : str
+        The pooling column to use for hue value.
+    size_metric : str
+        The size metric to use as the height for each bar.
+
+    Returns
+    -------
+    A tuple ``(g, df)`` where ``g`` is a handle to the plot and ``df`` is the
+    underlying DataFrame.
+
+    '''
+
+    assert size_metric in ('clones', 'copies', 'uniques')
+
+    def _norm(df):
+        df[size_metric] /= df[size_metric].sum()
+        return df
+
+    pdf = (
+        df
+        .groupby([pool, 'cdr3_num_nts'])[size_metric].sum()
+        .to_frame()
+        .reset_index()
+        .groupby(pool).apply(_norm)
+    )
+    g = sns.catplot(
+        data=pdf,
+        x='cdr3_num_nts',
+        y=size_metric,
+        hue=pool,
+        kind=kwargs.pop('kind', 'bar'),
+        **kwargs
+    )
+    g.set(xlabel='CDR3 length (NT)', ylabel='Clone Fraction')
+    return g, pdf

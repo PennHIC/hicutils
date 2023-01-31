@@ -50,6 +50,13 @@ def test_cdr3_spectratype(color_top):
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
 
+def test_cdr3_distribution():
+    path = f'tests/expected/cdr3_distribution'
+    g, pdf = plots.plot_cdr3_distribution(DF, POOL)
+    is_expected(pdf, path + '.tsv')
+    plt.savefig(path + '.pdf', bbox_inches='tight')
+
+
 @pytest.mark.parametrize(
     'gene,size_metric',
     itertools.product(
