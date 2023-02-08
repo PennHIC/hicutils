@@ -181,7 +181,7 @@ def plot_shm_range(df, pool, buckets=(1, 10, 25), **kwargs):
                 legend='reverse'
             )
         )
-        g.set(xlabel='', ylabel='% of Mutated Clones')
+        g.set(xlabel='', ylabel='% of Clones')
         handles, labels = g.get_legend_handles_labels()
         g.legend(
             reversed(handles),
