@@ -226,3 +226,49 @@ def plot_ranges(df, pool, intervals=(10, 100, 1000), order_func=None, **kwargs):
     plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1))
 
     return ax, pdf
+
+
+def plot_d_index(
+        df,
+        pool,
+        cutoff=20,
+        **kwargs):
+    '''
+    Plots the Dx index for clones in ``df``.  The default cutoff value is 20
+    and the generated figure is a dot plot of Dx values stratified by ``pool``.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame used to plot the top clones.
+    cutoff : int
+        The D-value to use as a cutoff, defaults to 20.
+
+    Returns
+    -------
+    A tuple ``(g, df)`` where ``g`` is a handle to the plot and ``df`` is the
+    underlying DataFrame.
+
+    '''
+    df = (
+        df
+        .groupby(pool)
+        .apply(_get_d, cutoff)
+        .to_frame()
+        .reset_index()
+        .rename({0: 'd'}, axis=1)
+    )
+
+    g = sns.catplot(
+        data=df,
+        x=pool,
+        y='d',
+        **kwargs
+    )
+    g.axes.flatten()[0].set_xticklabels(
+        g.axes.flatten()[0].get_xticklabels(),
+        rotation=90
+    )
+    g.set(xlabel='', ylabel=f'D{cutoff} index')
+
+    return g, df

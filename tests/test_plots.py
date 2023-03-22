@@ -185,6 +185,17 @@ def test_top_clones(cutoff):
 
 
 @pytest.mark.parametrize(
+    'cutoff',
+    [10, 20, 50]
+)
+def test_d_index(cutoff):
+    path = f'tests/expected/d_index_{cutoff}'
+    g, pdf = plots.plot_d_index(DF, POOL, cutoff=cutoff)
+    is_expected(pdf, path + '.tsv')
+    plt.savefig(path + '.pdf', bbox_inches='tight')
+
+
+@pytest.mark.parametrize(
     'pool_by,size,clone_features',
     [
         ('subject', 'clones', 'clone_id'),
