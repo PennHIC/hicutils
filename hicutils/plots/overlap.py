@@ -23,6 +23,7 @@ def plot_strings(
     ylabels='counts',
     col_order=None,
     row_order=None,
+    order=None,
     pivot_hook=None,
     **kwargs,
 ):

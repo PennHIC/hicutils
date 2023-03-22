@@ -228,11 +228,7 @@ def plot_ranges(df, pool, intervals=(10, 100, 1000), order_func=None, **kwargs):
     return ax, pdf
 
 
-def plot_d_index(
-        df,
-        pool,
-        cutoff=20,
-        **kwargs):
+def plot_d_index(df, pool, cutoff=20, **kwargs):
     '''
     Plots the Dx index for clones in ``df``.  The default cutoff value is 20
     and the generated figure is a dot plot of Dx values stratified by ``pool``.
@@ -251,23 +247,16 @@ def plot_d_index(
 
     '''
     df = (
-        df
-        .groupby(pool)
+        df.groupby(pool)
         .apply(_get_d, cutoff)
         .to_frame()
         .reset_index()
         .rename({0: 'd'}, axis=1)
     )
 
-    g = sns.catplot(
-        data=df,
-        x=pool,
-        y='d',
-        **kwargs
-    )
+    g = sns.catplot(data=df, x=pool, y='d', **kwargs)
     g.axes.flatten()[0].set_xticklabels(
-        g.axes.flatten()[0].get_xticklabels(),
-        rotation=90
+        g.axes.flatten()[0].get_xticklabels(), rotation=90
     )
     g.set(xlabel='', ylabel=f'D{cutoff} index')
 
