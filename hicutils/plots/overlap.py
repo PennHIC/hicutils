@@ -19,7 +19,8 @@ def plot_strings(
         scale=False,
         limit=None,
         ylabels='counts',
-        order=None,
+        col_order=None,
+        row_order=None,
         pivot_hook=None,
         **kwargs):
     '''
@@ -57,9 +58,12 @@ def plot_strings(
         If set to ``counts`` (the default) y-axis ticks will be shown
         indicating the number of clones in the plot.  If set to ``full``, all
         features in ``overlapping_features`` will be shown for each row.
-    order : function or None
+    col_order : function or None
         A function that is passed the pd.DataFrame and shall return a list of
         columns in the desired order.
+    row_order : function or None
+        A function that is passed the pd.DataFrame and shall return a list of
+        row indexes.
     pivot_hook : function or None
         A function to call on the pivoted table.  Useful for filtering
         sequences based on their frequency across pools.
@@ -102,24 +106,27 @@ def plot_strings(
 
     pdf = pdf.div(pdf.sum(axis=0), axis=1) * 100
 
-    pdf['total'] = pdf.sum(axis=1)
+    pdf['total'] = (pdf / pdf).sum(axis=1)
     pdf = (
         pdf
         .sort_values('total', ascending=False)
         .drop('total', axis=1)
     )
-    ret_df = pdf.copy()
 
     pdf = pdf.head(limit or len(pdf))
     pdf = pdf.fillna(0)
-    if order:
+    if col_order:
         pdf = pdf[order(pdf)]
     else:
         pdf = pdf[(pdf / pdf).sum().sort_values().index]
 
-    pdf = pdf.reindex((pdf / pdf).sort_values(list(pdf.columns)).index)
+    if row_order:
+        pdf = pdf.reindex(row_order(pdf))
+    else:
+        pdf = pdf.reindex((pdf / pdf).sort_values(list(pdf.columns)).index)
 
     pdf.columns = [f'{c} ({col_clone_counts[c]:.0f})' for c in pdf.columns]
+    ret_df = pdf.copy()
 
     if scale == 'log':
         pdf = (
