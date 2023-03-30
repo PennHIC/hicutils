@@ -1,6 +1,6 @@
-pandas>=1.5.1
-seaborn>=0.12.1
-scipy>=1.9.3
+pandas==1.5.1
+seaborn==0.12.1
+scipy==1.9.3
 coloredlogs==15.0.1
 requests==2.28.1
 logomaker==0.8
