@@ -1,6 +1,10 @@
+import itertools
+
 import numpy as np
+import pandas as pd
 import seaborn as sns
 import upsetplot as usp
+from scipy.spatial import distance
 
 from matplotlib.colors import LinearSegmentedColormap
 
@@ -116,7 +120,7 @@ def plot_strings(
     pdf = pdf.head(limit or len(pdf))
     pdf = pdf.fillna(0)
     if col_order:
-        pdf = pdf[order(pdf)]
+        pdf = pdf[col_order(pdf)]
     else:
         pdf = pdf[(pdf / pdf).sum().sort_values().index]
 
@@ -258,3 +262,78 @@ def plot_upset(df, pool, size='clones', clone_features=['clone_id'],
             ax[extra].set_ylabel(ax[extra].get_ylabel(), fontsize=15)
             ax[extra].yaxis.tick_right()
         return ax, cdf
+
+
+def plot_similarity(df, pool, dist_func_name, clone_features='clone_id'):
+    '''
+    Generates an UpSet plot of clonal data.  The UpSet plot may be scaled by
+    clones or copies with ``size`` and the definition of a clone can be varied
+    with the ``clone_features`` parameter.  Further, distributions of other
+    variables such as ``cdr3_num_nts`` and ``shm`` can be placed above each
+    intersection bar with ``subplots``.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to use as the source of clonal overlap information.
+    pool : str
+        How to pool the clones to calculate similarity
+    dist_func_name : function
+        Function to use for similarity calculation.  Accepts ``jaccard`` or
+        ``cosine``.
+    clone_features : list(str)
+        The feature(s) to use for clone definition.  The default ``clone_id``
+        uses the clone definitions in ``df``.  This can be altered to any other
+        columns in the DataFrame such as ``cdr3_aa``.
+
+    Returns
+    -------
+    A tuple ``(g, df)`` where ``g`` is a handle to the plot and ``df`` is the
+    underlying overlap DataFrame.
+
+    '''
+
+    assert dist_func_name in ('jaccard', 'cosine')
+    use_size = 'clones' if dist_func_name == 'jaccard' else 'copies'
+
+    pdf = df.pivot_table(
+        index=pool, columns=clone_features, values=use_size
+    ).fillna(0)
+
+    total_clones = (pdf / pdf).sum(axis=1)
+    pdf.index = [
+        '{} ({})'.format(c, int(total_clones.loc[c]))
+        for c in pdf.index
+    ]
+    sim = {}
+    dist_func = getattr(distance, dist_func_name)
+    for s1, s2 in list(itertools.combinations(pdf.index, 2)):
+        fsim = 1 - dist_func(pdf.loc[s1], pdf.loc[s2])
+        sim.setdefault(
+            s1, {}
+        )[s2] = sim.setdefault(s2, {})[s1] = round(fsim, 3)
+
+    sim = pd.DataFrame(sim)
+    sim = sim[sim.index]
+    mask = sim.isna()
+    sim = sim.fillna(0)
+    if len(sim) < 2:
+        return
+
+    sim = sim[list(sorted(sim.columns))].reindex(sorted(sim.index))
+
+    g = sns.clustermap(
+        data=sim,
+        mask=mask,
+        row_cluster=False,
+        col_cluster=False,
+        cmap='coolwarm',
+        linewidths=1,
+        annot=True,
+        figsize=(1.5 * len(sim), 1.5 * len(sim))
+    )
+
+    g.ax_heatmap.set_xlabel('')
+    g.ax_heatmap.set_ylabel('')
+    g.ax_heatmap.set_facecolor('#999999')
+    return g, sim

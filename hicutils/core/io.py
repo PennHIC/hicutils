@@ -1,9 +1,11 @@
 import glob
 import os
+import re
 import requests
 import time
 import zipfile
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -205,3 +207,64 @@ def pull_immunedb_data(endpoint, db_name, out_name,
             raise e
 
     return read_directory(out_name)
+
+
+DEFAULT_METADATA_REGEX = re.compile(
+    r'(?P<METADATA_sequencing_date>\d{4}-\d{2}-\d{2})'
+    r'-(?P<METADATA_species>(human|mouse))'
+    r'-(?P<METADATA_locus>(\w+))'
+    r'-(?P<subject>(\w+))'
+    r'-rep(?P<METADATA_replicate_number>(\d+))'
+)
+
+
+def convert_igblast(path, metadata_regex=DEFAULT_METADATA_REGEX):
+    dfs = []
+    for fn in glob.glob(os.path.join(path, '*.tsv')):
+        df = pd.read_csv(fn, sep='\t')
+        df['replicate_name'] = os.path.basename(fn).split('.')[0]
+        metadata = re.search(metadata_regex, fn)
+        for k, v in metadata.groupdict().items():
+            df[k] = v
+        dfs.append(df)
+
+    df = pd.concat(dfs)
+    df['v_call'] = df['v_call'].str.split('*').str[0]
+    df['j_call'] = df['j_call'].str.split('*').str[0]
+
+    meta_keys = metadata.groupdict().keys()
+    df['copies'] = 1
+
+    df = df.groupby([
+        'replicate_name', 'v_call', 'j_call', 'junction_aa',
+        'productive', 'junction_length',
+        *meta_keys
+    ]).agg(
+        {
+            'v_sequence_alignment': lambda s: s.iloc[0],
+            'junction': lambda s: s.iloc[0],
+            'v_identity': np.mean,
+            'copies': np.sum
+        }
+    ).reset_index()
+
+    remaps = {
+        'v_call': 'v_gene',
+        'j_call': 'j_gene',
+        'productive': 'functional',
+        'junction': 'cdr3_nt',
+        'junction_length': 'cdr3_num_nts',
+        'junction_aa': 'cdr3_aa',
+        'v_identity': 'avg_v_identity',
+        'v_sequence_alignment': 'top_copy_seq',
+        'copies': 'copies',
+        'replicate_name': 'replicate_name',
+        **{k: k for k in meta_keys}
+    }
+    df = df[remaps.keys()].rename(remaps, axis=1)
+    df['METADATA_replicate_number'] = df['METADATA_replicate_number'].astype(
+        int)
+    df['clone_id'] = range(1, len(df) + 1)
+    df['clones'] = 1
+
+    return df.sort_values(list(df.columns), ascending=False)

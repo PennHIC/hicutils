@@ -64,10 +64,24 @@ def test_cdr3_distribution():
         ['clones', 'copies'],
     )
 )
-def test_gene_usage(gene, size_metric):
-    path = f'tests/expected/gene_usage_{gene}_{size_metric}'
-    _, pdf = plots.plot_gene_usage(DF, POOL, gene, size_metric=size_metric,
-                                   figsize=(12, 6))
+def test_gene_heatmap(gene, size_metric):
+    path = f'tests/expected/gene_heatmap_{gene}_{size_metric}'
+    _, pdf = plots.plot_gene_heatmap(DF, POOL, gene, size_metric=size_metric,
+                                     figsize=(12, 6))
+    is_expected(pdf, path + '.tsv')
+    plt.savefig(path + '.pdf', bbox_inches='tight')
+
+
+@pytest.mark.parametrize(
+    'gene,size_metric',
+    itertools.product(
+        ['v_gene', 'j_gene'],
+        ['clones', 'copies'],
+    )
+)
+def test_gene_frequency(gene, size_metric):
+    path = f'tests/expected/gene_frequency_{gene}_{size_metric}'
+    _, pdf = plots.plot_gene_frequency(DF, POOL, gene, size_metric=size_metric)
     is_expected(pdf, path + '.tsv')
     plt.savefig(path + '.pdf', bbox_inches='tight')
 

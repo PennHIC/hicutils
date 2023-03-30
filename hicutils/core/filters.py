@@ -64,6 +64,48 @@ def filter_functional(df, functional=True):
     return df[df.functional == ('T' if functional else 'F')]
 
 
+def filter_by_gene_frequency(df, min_frequency, by='subject', gene='v_gene'):
+    '''
+    Removes clones in ``by`` (defaults to ``subject``) which have an overall
+    ``gene`` usage less than or equal to ``min_frequency``.
+
+    For example, if ``min_frequency=0.05`` and ``by='subject'``, all clones
+    using a V-gene with a frequency less than or equal to 0.05 in a given
+    subject are removed.
+
+    df : str
+        The DataFrame to filter.
+    min_frequency : float
+        The minimum frequency of a gene in ``by`` that should be included.
+    by : str
+        The column on which to calculate frequency.  Defaults to ``subject``.
+    gene : str
+        The gene on which to filter.  Accepts ``v_gene`` or ``j_gene``
+        defaulting to ``j_gene``
+
+    Returns
+    ------
+    DataFrame filtered on gene frequency in ``by``.
+
+    '''
+    assert gene in ('v_gene', 'j_gene')
+
+    def _filter_group(df):
+        pdf = (
+            df
+            .groupby(gene)
+            .clone_id
+            .nunique()
+            .to_frame()
+            .reset_index()
+        )
+        pdf.clone_id /= pdf.clone_id.sum()
+        valid_genes = pdf[pdf.clone_id >= min_frequency][gene]
+        return df[df[gene].isin(valid_genes)]
+
+    return df.groupby(by, group_keys=False).apply(_filter_group)
+
+
 def _overlap_pivot(df, pool):
     return df.pivot_table(
         index='clone_id',
@@ -76,7 +118,6 @@ def _overlap_pivot(df, pool):
 def filter_number_of_pools(df, pool, n, func='greater_equal', limit_to=None):
     '''
     Filters clones based on the number of pools in which it occurs.
-
     df : str
         The DataFrame to filter.
     pool : str
@@ -92,7 +133,6 @@ def filter_number_of_pools(df, pool, n, func='greater_equal', limit_to=None):
     limit_to : list(str), str, None
         If specified, overlap will be limited to the specified pools.  This is
         useful to filter clones based on their overlap in a subset of pools.
-
     Returns
     -------
     DataFrame filtered by number of pools.
