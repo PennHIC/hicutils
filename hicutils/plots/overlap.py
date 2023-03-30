@@ -314,7 +314,7 @@ def plot_similarity(df, pool, dist_func_name, clone_features='clone_id'):
     mask = sim.isna()
     sim = sim.fillna(0)
     if len(sim) < 2:
-        return
+        raise IndexError('Similarity matrix only has one value.')
 
     sim = sim[list(sorted(sim.columns))].reindex(sorted(sim.index))
 

@@ -216,17 +216,26 @@ DEFAULT_METADATA_REGEX = re.compile(
     r'(?P<METADATA_sequencing_date>\d{4}-\d{2}-\d{2})'
     r'-(?P<METADATA_species>(human|mouse))'
     r'-(?P<METADATA_locus>(\w+))'
-    r'-(?P<subject>(\w+))'
+    r'-(?P<subject>([A-Za-z0-9_\-]+))'
     r'-rep(?P<METADATA_replicate_number>(\d+))'
 )
+USE_COLS = [
+    'v_call',
+    'j_call',
+    'junction',
+    'junction_aa',
+    'productive',
+    'junction_length',
+    'v_identity',
+]
 
 
 def convert_igblast(path, metadata_regex=DEFAULT_METADATA_REGEX):
     dfs = []
     for fn in glob.glob(os.path.join(path, '*.tsv')):
-        df = pd.read_csv(fn, sep='\t')
-        df['replicate_name'] = os.path.basename(fn).split('.')[0]
+        df = pd.read_csv(fn, sep='\t', usecols=USE_COLS)
         metadata = re.search(metadata_regex, fn)
+        df['replicate_name'] = metadata.group(0)
         for k, v in metadata.groupdict().items():
             df[k] = v
         dfs.append(df)
@@ -252,7 +261,6 @@ def convert_igblast(path, metadata_regex=DEFAULT_METADATA_REGEX):
         )
         .agg(
             {
-                'v_sequence_alignment': lambda s: s.iloc[0],
                 'junction': lambda s: s.iloc[0],
                 'v_identity': np.mean,
                 'copies': np.sum,
@@ -269,7 +277,6 @@ def convert_igblast(path, metadata_regex=DEFAULT_METADATA_REGEX):
         'junction_length': 'cdr3_num_nts',
         'junction_aa': 'cdr3_aa',
         'v_identity': 'avg_v_identity',
-        'v_sequence_alignment': 'top_copy_seq',
         'copies': 'copies',
         'replicate_name': 'replicate_name',
         **{k: k for k in meta_keys},
