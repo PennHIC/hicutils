@@ -10,23 +10,22 @@ from matplotlib.colors import LinearSegmentedColormap
 
 
 def _sort_presence(df):
-    return df.reindex(
-        (df / df).sort_values(list(df.columns)).index
-    )
+    return df.reindex((df / df).sort_values(list(df.columns)).index)
 
 
 def plot_strings(
-        df,
-        pool,
-        only_overlapping=True,
-        overlapping_features=('clone_id', 'cdr3_aa', 'v_gene', 'j_gene'),
-        scale=False,
-        limit=None,
-        ylabels='counts',
-        col_order=None,
-        row_order=None,
-        pivot_hook=None,
-        **kwargs):
+    df,
+    pool,
+    only_overlapping=True,
+    overlapping_features=('clone_id', 'cdr3_aa', 'v_gene', 'j_gene'),
+    scale=False,
+    limit=None,
+    ylabels='counts',
+    col_order=None,
+    row_order=None,
+    pivot_hook=None,
+    **kwargs,
+):
     '''
     Creates an overlap string plot where each row represents a clone and each
     column represents a pool.  Among other features, the definition of a clone
@@ -84,15 +83,11 @@ def plot_strings(
 
     df = df.copy()
     df['label'] = df[list(overlapping_features)].apply(
-        lambda c: ' '.join([str(s) for s in c]),
-        axis=1
+        lambda c: ' '.join([str(s) for s in c]), axis=1
     )
 
     pdf = df.pivot_table(
-        index='label',
-        columns=pool,
-        values='copies',
-        aggfunc=np.sum
+        index='label', columns=pool, values='copies', aggfunc=np.sum
     ).fillna(0)
 
     if len(pdf.columns) < 2:
@@ -111,11 +106,7 @@ def plot_strings(
     pdf = pdf.div(pdf.sum(axis=0), axis=1) * 100
 
     pdf['total'] = (pdf / pdf).sum(axis=1)
-    pdf = (
-        pdf
-        .sort_values('total', ascending=False)
-        .drop('total', axis=1)
-    )
+    pdf = pdf.sort_values('total', ascending=False).drop('total', axis=1)
 
     pdf = pdf.head(limit or len(pdf))
     pdf = pdf.fillna(0)
@@ -134,8 +125,7 @@ def plot_strings(
 
     if scale == 'log':
         pdf = (
-            pdf
-            .apply(np.log10)
+            pdf.apply(np.log10)
             .replace(np.inf, 0)
             .replace([np.inf, -np.inf], np.nan)
         )
@@ -158,20 +148,19 @@ def plot_strings(
             col_cluster=False,
             vmin=pdf.min().min() if scale else 0,
             vmax=pdf.max().max() if scale else 1,
-            cbar_pos=(0, .25, .03, .4),
-            dendrogram_ratio=(.2, .01) if scale else (0.01, 0.01),
+            cbar_pos=(0, 0.25, 0.03, 0.4),
+            dendrogram_ratio=(0.2, 0.01) if scale else (0.01, 0.01),
             cbar_kws={
                 'label': '% of column{}'.format(
                     ' (log scale)' if scale == 'log' else ''
                 ),
             },
-            **kwargs
+            **kwargs,
         )
 
         if ylabels == 'full':
             g.ax_heatmap.set_yticklabels(
-                g.ax_heatmap.get_yticklabels(),
-                fontsize=8
+                g.ax_heatmap.get_yticklabels(), fontsize=8
             )
         elif ylabels == 'counts':
             labels = np.arange(1, len(pdf) + 1, max(1, len(pdf) // 5))
@@ -187,8 +176,15 @@ def plot_strings(
     return g, ret_df
 
 
-def plot_upset(df, pool, size='clones', clone_features=['clone_id'],
-               subplots=tuple(), subplot_kind='violin', **kwargs):
+def plot_upset(
+    df,
+    pool,
+    size='clones',
+    clone_features=['clone_id'],
+    subplots=tuple(),
+    subplot_kind='violin',
+    **kwargs,
+):
     '''
     Generates an UpSet plot of clonal data.  The UpSet plot may be scaled by
     clones or copies with ``size`` and the definition of a clone can be varied
@@ -230,31 +226,34 @@ def plot_upset(df, pool, size='clones', clone_features=['clone_id'],
         raise IndexError(f'Pool "{pool}" must have 2+ values')
 
     pdf = df.pivot_table(
-        index=clone_features,
-        columns=pool,
-        values=size,
-        aggfunc=np.sum
+        index=clone_features, columns=pool, values=size, aggfunc=np.sum
     )
     index = pdf.apply(lambda r: r > 0, axis=1).fillna(False)
 
-    counts_df = df.groupby(clone_features).agg({
-        'clones': lambda v: 1,
-        'copies': np.sum,
-        'shm': np.mean,
-        'cdr3_num_nts': np.mean
-    })
+    counts_df = df.groupby(clone_features).agg(
+        {
+            'clones': lambda v: 1,
+            'copies': np.sum,
+            'shm': np.mean,
+            'cdr3_num_nts': np.mean,
+        }
+    )
     cdf = index.join(counts_df).set_index(list(index.columns))
 
     with sns.plotting_context('notebook'):
         figure = usp.UpSet(
-            cdf, sum_over=size, element_size=50,
+            cdf,
+            sum_over=size,
+            element_size=50,
             intersection_plot_elements=8,
-            **kwargs
+            **kwargs,
         )
         for i, field in enumerate(subplots):
             figure.add_catplot(
-                value=field, kind=subplot_kind, color=sns.color_palette()[i],
-                elements=3
+                value=field,
+                kind=subplot_kind,
+                color=sns.color_palette()[i],
+                elements=3,
             )
         ax = figure.plot()
 
@@ -302,16 +301,13 @@ def plot_similarity(df, pool, dist_func_name, clone_features='clone_id'):
 
     total_clones = (pdf / pdf).sum(axis=1)
     pdf.index = [
-        '{} ({})'.format(c, int(total_clones.loc[c]))
-        for c in pdf.index
+        '{} ({})'.format(c, int(total_clones.loc[c])) for c in pdf.index
     ]
     sim = {}
     dist_func = getattr(distance, dist_func_name)
     for s1, s2 in list(itertools.combinations(pdf.index, 2)):
         fsim = 1 - dist_func(pdf.loc[s1], pdf.loc[s2])
-        sim.setdefault(
-            s1, {}
-        )[s2] = sim.setdefault(s2, {})[s1] = round(fsim, 3)
+        sim.setdefault(s1, {})[s2] = sim.setdefault(s2, {})[s1] = round(fsim, 3)
 
     sim = pd.DataFrame(sim)
     sim = sim[sim.index]
@@ -330,7 +326,7 @@ def plot_similarity(df, pool, dist_func_name, clone_features='clone_id'):
         cmap='coolwarm',
         linewidths=1,
         annot=True,
-        figsize=(1.5 * len(sim), 1.5 * len(sim))
+        figsize=(1.5 * len(sim), 1.5 * len(sim)),
     )
 
     g.ax_heatmap.set_xlabel('')

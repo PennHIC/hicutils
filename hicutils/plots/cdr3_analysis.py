@@ -10,13 +10,22 @@ from .heatmap import basic_clustermap
 
 def _get_counts(pdf, size_metric):
     # TODO: Fix this to count clones only once if size_metric = clones
-    return pd.DataFrame(pdf.cdr3_aa.apply(
-        lambda r: pd.Series(Counter(r))
-    ).fillna(0).mul(pdf[size_metric], axis=0).sum()).T
+    return pd.DataFrame(
+        pdf.cdr3_aa.apply(lambda r: pd.Series(Counter(r)))
+        .fillna(0)
+        .mul(pdf[size_metric], axis=0)
+        .sum()
+    ).T
 
 
-def plot_cdr3_aa_usage(df, pool, size_metric='clones', normalize_by='rows',
-                       cluster_by='both', figsize=(20, 10)):
+def plot_cdr3_aa_usage(
+    df,
+    pool,
+    size_metric='clones',
+    normalize_by='rows',
+    cluster_by='both',
+    figsize=(20, 10),
+):
     '''
     Plots CDR3 amino-acid usage separated by pool.
 
@@ -49,8 +58,7 @@ def plot_cdr3_aa_usage(df, pool, size_metric='clones', normalize_by='rows',
     df = df.copy()
 
     pdf = pd.concat(
-        {k: _get_counts(d, size_metric) for k, d in df.groupby(pool)},
-        sort=True
+        {k: _get_counts(d, size_metric) for k, d in df.groupby(pool)}, sort=True
     ).fillna(0)
     pdf.index = pdf.index.droplevel(1)
 
@@ -82,9 +90,8 @@ def plot_cdr3_logo(df, by, length, hide_ambig=True, **kwargs):
 
     assert by in ('cdr3_aa', 'cdr3_nt')
     cdrs = df[df[by].str.len() == length][by]
-    m = (
-        logomaker.alignment_to_matrix(cdrs)
-        .pipe(logomaker.transform_matrix, normalize_values=True)
+    m = logomaker.alignment_to_matrix(cdrs).pipe(
+        logomaker.transform_matrix, normalize_values=True
     )
     if hide_ambig:
         if by == 'cdr3_nt' and 'N' in m.columns:
@@ -92,14 +99,9 @@ def plot_cdr3_logo(df, by, length, hide_ambig=True, **kwargs):
         if by == 'cdr3_aa' and 'X' in m.columns:
             m = m.drop('X', axis=1)
     color_scheme = kwargs.pop(
-        'color_scheme',
-        'skylign_protein' if by == 'cdr3_aa' else 'classic'
+        'color_scheme', 'skylign_protein' if by == 'cdr3_aa' else 'classic'
     )
-    g = logomaker.Logo(
-        m,
-        color_scheme=color_scheme,
-        show_spines=False
-    )
+    g = logomaker.Logo(m, color_scheme=color_scheme, show_spines=False)
     g.ax.set(xlabel='Position', ylabel='Fraction of Total')
     return g, m
 
@@ -126,8 +128,7 @@ def plot_cdr3_spectratype(df, color_top=10, **kwargs):
     all_df = df.groupby('cdr3_num_nts').copies_percent.sum().reset_index()
     top_df = df.sort_values('copies_percent', ascending=False)[:color_top]
     cdf = (
-        pd
-        .concat([top_df, all_df], sort=False)
+        pd.concat([top_df, all_df], sort=False)
         .fillna('')
         .sort_values('copies_percent', ascending=False)
     )[['cdr3_num_nts', 'copies_percent', 'cdr3_aa']]
@@ -144,13 +145,15 @@ def plot_cdr3_spectratype(df, color_top=10, **kwargs):
         aspect=kwargs.pop('aspect', 2),
         legend=False,
         errorbar=None,
-        palette=colors
+        palette=colors,
     )
 
-    g.set(xticklabels=[
-        l if i % 3 == 0 else ''
-        for i, l in enumerate(g.ax.get_xticklabels())
-    ])
+    g.set(
+        xticklabels=[
+            l if i % 3 == 0 else ''
+            for i, l in enumerate(g.ax.get_xticklabels())
+        ]
+    )
     g.set(xlabel='CDR3 Length (NT)', ylabel='% Total Copies')
     g.despine(left=True)
     plt.legend(loc='upper right')
@@ -185,11 +188,12 @@ def plot_cdr3_distribution(df, pool, size_metric='clones', **kwargs):
         return df
 
     pdf = (
-        df
-        .groupby([pool, 'cdr3_num_nts'])[size_metric].sum()
+        df.groupby([pool, 'cdr3_num_nts'])[size_metric]
+        .sum()
         .to_frame()
         .reset_index()
-        .groupby(pool).apply(_norm)
+        .groupby(pool)
+        .apply(_norm)
     )
     g = sns.catplot(
         data=pdf,

@@ -10,16 +10,16 @@ def _aggregate_pool(pool_df, pool_by):
 
     name = pool_df.name
     pool_df = pool_df.sort_values('copies', ascending=False)
-    pool_df['avg_v_identity'] = (
-        pool_df['avg_v_identity'] * pool_df['copies']
-    )
+    pool_df['avg_v_identity'] = pool_df['avg_v_identity'] * pool_df['copies']
     funcs = {c: 'first' for c in pool_df.columns if 'METADATA_' not in c}
-    funcs.update({
-        'instances': np.sum,
-        'copies': np.sum,
-        'top_copy_seq': lambda s: s.iloc[0],
-        'avg_v_identity': np.sum
-    })
+    funcs.update(
+        {
+            'instances': np.sum,
+            'copies': np.sum,
+            'top_copy_seq': lambda s: s.iloc[0],
+            'avg_v_identity': np.sum,
+        }
+    )
     pool_df = pool_df.groupby('clone_id', as_index=False).agg(funcs)
     total_copies_by_clone = pool_df.groupby('clone_id').copies.sum()
     pool_df['total_copies'] = pool_df['clone_id'].apply(
@@ -40,8 +40,7 @@ def pool_by(df, pool_by):
         pool_by = [pool_by]
 
     pool_by = [
-        f'METADATA_{p}'
-        if p not in ('subject', 'replicate_name') else p
+        f'METADATA_{p}' if p not in ('subject', 'replicate_name') else p
         for p in pool_by
     ]
     df = df.groupby(pool_by, dropna=False).apply(_aggregate_pool, pool_by)

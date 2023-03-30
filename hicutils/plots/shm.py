@@ -16,8 +16,9 @@ def _get_shm(pdf, df, pool, size_metric):
     return ret
 
 
-def plot_shm_distribution(df, pool, size_metric, palette=None, order=None,
-                          **kwargs):
+def plot_shm_distribution(
+    df, pool, size_metric, palette=None, order=None, **kwargs
+):
     '''
     Plots the SHM distribution of a pooled DataFrame using either clones,
     copies, or uniques as a size metric.
@@ -47,9 +48,9 @@ def plot_shm_distribution(df, pool, size_metric, palette=None, order=None,
     df = _add_counts(df, pool)
     df['shm'] = df['shm'].round()
     df = (
-        df
-        .groupby(['shm', pool])
-        .apply(_get_shm, df, pool, size_metric).reset_index()
+        df.groupby(['shm', pool])
+        .apply(_get_shm, df, pool, size_metric)
+        .reset_index()
     )
 
     final_colors = None
@@ -70,7 +71,7 @@ def plot_shm_distribution(df, pool, size_metric, palette=None, order=None,
             height=kwargs.pop('height', 8),
             aspect=kwargs.pop('aspect', 1.5),
             palette=final_colors,
-            **kwargs
+            **kwargs,
         )
         g.set(
             xlabel='SHM (% of Mutated V-gene NT)',
@@ -98,11 +99,7 @@ def plot_shm_aggregate(df, pool, **kwargs):
     '''
 
     g = sns.catplot(
-        data=df,
-        x=pool,
-        y='shm',
-        kind=kwargs.pop('kind', 'violin'),
-        **kwargs
+        data=df, x=pool, y='shm', kind=kwargs.pop('kind', 'violin'), **kwargs
     )
     g.set(xlabel='', ylabel='SHM %')
     return g, df
@@ -125,9 +122,10 @@ def _get_bucket(shm, buckets=(1, 2, 5, 10, 20)):
 def _sort_buckets(buckets):
     bucket_info = [
         (
-            int(re.search(r'\d+', b).group()) if '-' in b
+            int(re.search(r'\d+', b).group())
+            if '-' in b
             else int(re.search(r'\d+', b).group()) + 1,
-            b
+            b,
         )
         for b in buckets
     ]
@@ -163,23 +161,14 @@ def plot_shm_range(df, pool, buckets=(1, 10, 25), **kwargs):
     buckets = [b for b in buckets if b < df.shm.max()]
     df = df.copy()
     df['shm_bucket'] = df['shm'].apply(_get_bucket, buckets=buckets)
-    df = (
-        df
-        .groupby(pool)
-        .apply(_clone_frac_norm)
-        .unstack()['clone_id']
-    )
+    df = df.groupby(pool).apply(_clone_frac_norm).unstack()['clone_id']
     df = df[[df.columns[i] for i in _sort_buckets(list(df.columns))]]
     with sns.plotting_context('poster'):
-        g = (
-            df
-            .plot
-            .bar(
-                stacked=True,
-                figsize=kwargs.pop('figsize', (12, 8)),
-                color=kwargs.pop('color', sns.color_palette()[1:]),
-                legend='reverse'
-            )
+        g = df.plot.bar(
+            stacked=True,
+            figsize=kwargs.pop('figsize', (12, 8)),
+            color=kwargs.pop('color', sns.color_palette()[1:]),
+            legend='reverse',
         )
         g.set(xlabel='', ylabel='% of Clones')
         handles, labels = g.get_legend_handles_labels()
@@ -188,7 +177,7 @@ def plot_shm_range(df, pool, buckets=(1, 10, 25), **kwargs):
             reversed(labels),
             loc='upper right',
             bbox_to_anchor=(1.3, 1),
-            title='SHM %'
+            title='SHM %',
         )
 
     return g, df

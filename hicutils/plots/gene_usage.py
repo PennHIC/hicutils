@@ -4,9 +4,15 @@ import seaborn as sns
 from .heatmap import basic_clustermap
 
 
-def plot_gene_heatmap(df, pool, gene, size_metric='clones',
-                      normalize_by='rows', cluster_by='both',
-                      figsize=(30, 10)):
+def plot_gene_heatmap(
+    df,
+    pool,
+    gene,
+    size_metric='clones',
+    normalize_by='rows',
+    cluster_by='both',
+    figsize=(30, 10),
+):
     '''
     Generates a gene-usage heatmap showing the utilization of each V or J gene
     based on pools.
@@ -45,17 +51,15 @@ def plot_gene_heatmap(df, pool, gene, size_metric='clones',
     ).fillna(0)
 
     total_clones = df.groupby(pool).clone_id.nunique()
-    pdf.index = [
-        f'{c} ({int(total_clones.loc[c])})'
-        for c in pdf.index
-    ]
+    pdf.index = [f'{c} ({int(total_clones.loc[c])})' for c in pdf.index]
 
     g = basic_clustermap(pdf, normalize_by, cluster_by, figsize)
     return g, pdf
 
 
-def plot_gene_frequency(df, pool, gene, size_metric='clones', by=None,
-                        **kwargs):
+def plot_gene_frequency(
+    df, pool, gene, size_metric='clones', by=None, **kwargs
+):
     '''
     Generates a gene-usage dot/bar plot showing the utilization of each V or J
     gene based on pools.
@@ -89,19 +93,17 @@ def plot_gene_frequency(df, pool, gene, size_metric='clones', by=None,
         pool = [pool]
     pdf = df.groupby([*pool, gene])
     if size_metric == 'clones':
-        pdf = pdf.clone_id.nunique().to_frame().reset_index().rename(
-            {
-                'clone_id': 'clones'
-            },
-            axis=1
+        pdf = (
+            pdf.clone_id.nunique()
+            .to_frame()
+            .reset_index()
+            .rename({'clone_id': 'clones'}, axis=1)
         )
     else:
         pdf = pdf[size_metric].sum().to_frame().reset_index()
 
-    pdf['freq'] = (
-        pdf
-        .groupby(pool)[size_metric]
-        .apply(lambda c: 100 * c / c.sum())
+    pdf['freq'] = pdf.groupby(pool)[size_metric].apply(
+        lambda c: 100 * c / c.sum()
     )
 
     g = sns.catplot(
@@ -113,7 +115,7 @@ def plot_gene_frequency(df, pool, gene, size_metric='clones', by=None,
         aspect=kwargs.pop('aspect', 3),
         dodge=kwargs.pop('dodge', True),
         kind=kwargs.pop('kind', 'strip'),
-        **kwargs
+        **kwargs,
     )
     g.set(xlabel='', ylabel=f'{size_metric.capitalize()} %')
     g.axes[0][0].set_xticklabels(g.axes[0][0].get_xticklabels(), rotation=90)

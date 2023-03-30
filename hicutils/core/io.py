@@ -98,8 +98,9 @@ def read_directory(path):
     return df
 
 
-def save_fig_and_data(name, df, path='./', ext='pdf',
-                      **kwargs):  # pragma: no cover
+def save_fig_and_data(
+    name, df, path='./', ext='pdf', **kwargs
+):  # pragma: no cover
     '''
     Saves the most recently generated figure and associated data to files.
 
@@ -151,14 +152,16 @@ def pull_immunedb_metadata(endpoint):
             {
                 'replicate_name': r['name'],
                 'subject': r['subject']['identifier'],
-                **r['metadata']
-            } for r in resp
+                **r['metadata'],
+            }
+            for r in resp
         ],
     )
 
 
-def pull_immunedb_data(endpoint, db_name, out_name,
-                       skip_existing=True):  # pragma: no cover
+def pull_immunedb_data(
+    endpoint, db_name, out_name, skip_existing=True
+):  # pragma: no cover
     '''
     Downloads unpooled clonal data from an ImmuneDB instance.
 
@@ -196,7 +199,7 @@ def pull_immunedb_data(endpoint, db_name, out_name,
         _run_job_and_get_result(
             endpoint,
             'export/clones?format=immunedb&pool_on=sample&samples=T10000',
-            out_name
+            out_name,
         )
 
         metadata = pull_immunedb_metadata(endpoint)
@@ -235,18 +238,28 @@ def convert_igblast(path, metadata_regex=DEFAULT_METADATA_REGEX):
     meta_keys = metadata.groupdict().keys()
     df['copies'] = 1
 
-    df = df.groupby([
-        'replicate_name', 'v_call', 'j_call', 'junction_aa',
-        'productive', 'junction_length',
-        *meta_keys
-    ]).agg(
-        {
-            'v_sequence_alignment': lambda s: s.iloc[0],
-            'junction': lambda s: s.iloc[0],
-            'v_identity': np.mean,
-            'copies': np.sum
-        }
-    ).reset_index()
+    df = (
+        df.groupby(
+            [
+                'replicate_name',
+                'v_call',
+                'j_call',
+                'junction_aa',
+                'productive',
+                'junction_length',
+                *meta_keys,
+            ]
+        )
+        .agg(
+            {
+                'v_sequence_alignment': lambda s: s.iloc[0],
+                'junction': lambda s: s.iloc[0],
+                'v_identity': np.mean,
+                'copies': np.sum,
+            }
+        )
+        .reset_index()
+    )
 
     remaps = {
         'v_call': 'v_gene',
@@ -259,11 +272,12 @@ def convert_igblast(path, metadata_regex=DEFAULT_METADATA_REGEX):
         'v_sequence_alignment': 'top_copy_seq',
         'copies': 'copies',
         'replicate_name': 'replicate_name',
-        **{k: k for k in meta_keys}
+        **{k: k for k in meta_keys},
     }
     df = df[remaps.keys()].rename(remaps, axis=1)
     df['METADATA_replicate_number'] = df['METADATA_replicate_number'].astype(
-        int)
+        int
+    )
     df['clone_id'] = range(1, len(df) + 1)
     df['clones'] = 1
 

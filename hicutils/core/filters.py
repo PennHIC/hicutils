@@ -91,14 +91,7 @@ def filter_by_gene_frequency(df, min_frequency, by='subject', gene='v_gene'):
     assert gene in ('v_gene', 'j_gene')
 
     def _filter_group(df):
-        pdf = (
-            df
-            .groupby(gene)
-            .clone_id
-            .nunique()
-            .to_frame()
-            .reset_index()
-        )
+        pdf = df.groupby(gene).clone_id.nunique().to_frame().reset_index()
         pdf.clone_id /= pdf.clone_id.sum()
         valid_genes = pdf[pdf.clone_id >= min_frequency][gene]
         return df[df[gene].isin(valid_genes)]
@@ -108,10 +101,7 @@ def filter_by_gene_frequency(df, min_frequency, by='subject', gene='v_gene'):
 
 def _overlap_pivot(df, pool):
     return df.pivot_table(
-        index='clone_id',
-        columns=pool,
-        values='copies',
-        aggfunc=np.sum
+        index='clone_id', columns=pool, values='copies', aggfunc=np.sum
     )
 
 

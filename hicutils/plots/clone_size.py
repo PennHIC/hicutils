@@ -27,29 +27,24 @@ def plot_clone_sizes(df, cutoff=None, **kwargs):
 
     '''
     df = (
-        df
-        .groupby('copies')
+        df.groupby('copies')
         .clone_id.nunique()
-        .to_frame().rename({
-            'clone_id': 'clones',
-        }, axis=1)
+        .to_frame()
+        .rename(
+            {
+                'clone_id': 'clones',
+            },
+            axis=1,
+        )
     )
     df['clones'] = 100 * df['clones'] / df['clones'].sum()
-    df = (
-        df
-        .reindex(range(df.index.min(), df.index.max()))
-        .reset_index()
-    )
+    df = df.reindex(range(df.index.min(), df.index.max())).reset_index()
     if cutoff:
         clones = df[df['copies'] >= cutoff].clones.sum()
         df = df[df['copies'] < cutoff]
-        df = pd.concat([
-            df,
-            pd.DataFrame([{
-                'copies': f'{cutoff}+',
-                'clones': clones
-            }])
-        ])
+        df = pd.concat(
+            [df, pd.DataFrame([{'copies': f'{cutoff}+', 'clones': clones}])]
+        )
 
     g = sns.catplot(
         data=df,
@@ -59,7 +54,7 @@ def plot_clone_sizes(df, cutoff=None, **kwargs):
         color=sns.color_palette()[0],
         height=kwargs.pop('height', 6),
         aspect=kwargs.pop('aspect', 1.8),
-        **kwargs
+        **kwargs,
     )
     g.set(xlabel='Copies', ylabel='% of Clones')
 
@@ -67,11 +62,8 @@ def plot_clone_sizes(df, cutoff=None, **kwargs):
 
 
 def plot_top_clones(
-        df,
-        cutoff=20,
-        annotate=False,
-        color=sns.color_palette()[3],
-        figsize=(12, 8)):
+    df, cutoff=20, annotate=False, color=sns.color_palette()[3], figsize=(12, 8)
+):
     '''
     Plots the copy-number frequency of the top ``cutoff`` clones (default 20).
     Optionally, the ``annotate`` keyword can be set to one or more clone
@@ -107,13 +99,7 @@ def plot_top_clones(
 
     fig, ax = plt.subplots(figsize=(12, 8))
     cdf = df[:cutoff]
-    g = sns.barplot(
-        x='rank',
-        y='copies_percent',
-        data=cdf,
-        color=color,
-        ax=ax
-    )
+    g = sns.barplot(x='rank', y='copies_percent', data=cdf, color=color, ax=ax)
     g.set_xlabel('Size')
     g.set_ylabel('% of Clones')
 
@@ -121,28 +107,29 @@ def plot_top_clones(
         for i, p in enumerate(g.patches):
             ax.annotate(
                 ' '.join([str(s) for s in df.iloc[i][annotate]]),
-                (p.get_x() + p.get_width() / 2., p.get_height()),
-                ha='center', va='center', fontsize=10, color='black',
-                rotation=90, xytext=(0, 30),
-                textcoords='offset points'
+                (p.get_x() + p.get_width() / 2.0, p.get_height()),
+                ha='center',
+                va='center',
+                fontsize=10,
+                color='black',
+                rotation=90,
+                xytext=(0, 30),
+                textcoords='offset points',
             )
-    a = plt.axes([0.69, 0.58, .2, .2], facecolor='y')
-    colors = [
-        sns.color_palette()[3],
-        sns.color_palette('Reds', n_colors=5)[1]
-    ]
+    a = plt.axes([0.69, 0.58, 0.2, 0.2], facecolor='y')
+    colors = [sns.color_palette()[3], sns.color_palette('Reds', n_colors=5)[1]]
     frac = df[:cutoff]['copies_percent'].sum()
 
-    top_df = pd.DataFrame({
-        'percent': [frac, max(0, 100 - frac)]
-    }, index=['top', 'rest'])
+    top_df = pd.DataFrame(
+        {'percent': [frac, max(0, 100 - frac)]}, index=['top', 'rest']
+    )
 
     ax = top_df.plot.pie(
         y='percent',
         colors=colors,
         legend=False,
         labels=[f'{round(frac, 1)}%', ''],
-        ax=a
+        ax=a,
     )
     ax.set_title(f'% of Total Copies\n({df.copies.sum()})')
     ax.set_ylabel('')
@@ -155,26 +142,28 @@ def _range_for_pool(df, portions, total_clones, intervals):
     total_clones[pool] += len(df)
 
     for start, end in zip(intervals[:-1], intervals[1:]):
-        portions.append({
+        portions.append(
+            {
+                'pool': pool,
+                'start': start,
+                'end': end,
+                'copies': df[start:end].copies.sum(),
+            }
+        )
+    portions.append(
+        {
             'pool': pool,
-            'start': start,
-            'end': end,
-            'copies': df[start:end].copies.sum()
-        })
-    portions.append({
-        'pool': pool,
-        'start': end,
-        'end': '+',
-        'copies': df[end:].copies.sum()
-    })
+            'start': end,
+            'end': '+',
+            'copies': df[end:].copies.sum(),
+        }
+    )
     return portions
 
 
 def _get_d(df, d):
     return (
-        df.sort_values('copies', ascending=False)
-        .head(d)
-        .copies.sum()
+        df.sort_values('copies', ascending=False).head(d).copies.sum()
     ) / df.copies.sum()
 
 
@@ -184,12 +173,7 @@ def _label(r):
     return f'{r["start"] + 1}+'
 
 
-def plot_ranges(
-        df,
-        pool,
-        intervals=(10, 100, 1000),
-        order_func=None,
-        **kwargs):
+def plot_ranges(df, pool, intervals=(10, 100, 1000), order_func=None, **kwargs):
     intervals = [0, *intervals]
     portions = []
     total_clones = Counter()
@@ -201,10 +185,8 @@ def plot_ranges(
         lambda p: f'{p} ({total_clones[p]})'
     )
     portions['range'] = portions.apply(_label, axis=1)
-    pdf = (
-        portions
-        .pivot_table(index='pool', columns='range', values='copies',
-                     aggfunc=np.sum)
+    pdf = portions.pivot_table(
+        index='pool', columns='range', values='copies', aggfunc=np.sum
     )
     pdf = pdf.div(-pdf.sum(axis=1), axis=0)
 
@@ -212,19 +194,16 @@ def plot_ranges(
         int(re.search(r'\d+', c).group(0)) for c in pdf.columns
     ).argsort()
 
-    pdf = (
-        pdf[pdf.columns[order]]
-        .reindex(
-            pdf[pdf.columns[:-1]].sum(axis=1).sort_values().index
-        )
+    pdf = pdf[pdf.columns[order]].reindex(
+        pdf[pdf.columns[:-1]].sum(axis=1).sort_values().index
     )
 
     if order_func:
         pdf = order_func(pdf)
     else:
         d20s = list(
-            df
-            .groupby(pool).apply(_get_d, 20)
+            df.groupby(pool)
+            .apply(_get_d, 20)
             .sort_values(ascending=False)
             .index
         )
@@ -234,12 +213,13 @@ def plot_ranges(
         pdf = pdf.sort_values('order').drop('order', axis=1)
 
     colors = [
-        *kwargs.pop('color', sns.color_palette()[:len(intervals) - 1]),
-        (0.86, 0.86, 0.86)  # gray
+        *kwargs.pop('color', sns.color_palette()[: len(intervals) - 1]),
+        (0.86, 0.86, 0.86),  # gray
     ]
 
-    ax = pdf.plot.bar(stacked=True, figsize=kwargs.get('figsize', (10, 5)),
-                      color=colors)
+    ax = pdf.plot.bar(
+        stacked=True, figsize=kwargs.get('figsize', (10, 5)), color=colors
+    )
     ax.set_yticklabels([round(abs(tick), 2) for tick in ax.get_yticks()])
     ax.set_xlabel('')
     ax.set_ylabel('Fraction of Copies')
