@@ -263,7 +263,8 @@ def plot_upset(
         return ax, cdf
 
 
-def plot_similarity(df, pool, dist_func_name, clone_features='clone_id'):
+def plot_similarity(df, pool, dist_func_name, clone_features='clone_id',
+                    cutoff_func=None, **kwargs):
     '''
     Generates an UpSet plot of clonal data.  The UpSet plot may be scaled by
     clones or copies with ``size`` and the definition of a clone can be varied
@@ -284,6 +285,10 @@ def plot_similarity(df, pool, dist_func_name, clone_features='clone_id'):
         The feature(s) to use for clone definition.  The default ``clone_id``
         uses the clone definitions in ``df``.  This can be altered to any other
         columns in the DataFrame such as ``cdr3_aa``.
+    cutoff_func : func(df) -> float
+        A function returning a cutoff to designate the maximum value in the
+        DataFrame. All values greater than or equal to the returned value are
+        remapped to the returned value.
 
     Returns
     -------
@@ -296,7 +301,7 @@ def plot_similarity(df, pool, dist_func_name, clone_features='clone_id'):
     use_size = 'clones' if dist_func_name == 'jaccard' else 'copies'
 
     pdf = df.pivot_table(
-        index=pool, columns=clone_features, values=use_size
+        index=pool, columns=clone_features, values=use_size, aggfunc=np.sum
     ).fillna(0)
 
     total_clones = (pdf / pdf).sum(axis=1)
@@ -318,15 +323,20 @@ def plot_similarity(df, pool, dist_func_name, clone_features='clone_id'):
 
     sim = sim[list(sorted(sim.columns))].reindex(sorted(sim.index))
 
+    ret_df = sim = sim[list(sorted(sim.columns))].reindex(sorted(sim.index))
+    if cutoff_func:
+        sim = sim.copy()
+        cutoff = cutoff_func(sim)
+        sim[sim >= cutoff] = cutoff
+
     g = sns.clustermap(
         data=sim,
         mask=mask,
-        row_cluster=False,
-        col_cluster=False,
-        cmap='coolwarm',
-        linewidths=1,
-        annot=True,
-        figsize=(1.5 * len(sim), 1.5 * len(sim)),
+        row_cluster=kwargs.pop('row_cluster', False),
+        col_cluster=kwargs.pop('col_cluster', False),
+        cmap=kwargs.pop('cmap', 'coolwarm'),
+        linewidths=kwargs.pop('linewidths', 1),
+        **kwargs
     )
 
     g.ax_heatmap.set_xlabel('')

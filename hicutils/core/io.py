@@ -1,4 +1,5 @@
 import glob
+import multiprocessing as mp
 import os
 import re
 import requests
@@ -230,21 +231,24 @@ USE_COLS = [
 ]
 
 
-def convert_igblast(path, metadata_regex=DEFAULT_METADATA_REGEX):
-    dfs = []
-    for fn in glob.glob(os.path.join(path, '*.tsv')):
-        df = pd.read_csv(fn, sep='\t', usecols=USE_COLS)
-        metadata = re.search(metadata_regex, fn)
-        df['replicate_name'] = metadata.group(0)
-        for k, v in metadata.groupdict().items():
-            df[k] = v
-        dfs.append(df)
+def _read_igblast_tsv(fn):
+    df = pd.read_csv(fn, sep='\t', usecols=USE_COLS)
+    metadata = re.search(DEFAULT_METADATA_REGEX, fn)
+    df['replicate_name'] = metadata.group(0)
+    for k, v in metadata.groupdict().items():
+        df[k] = v
+    return df
+
+
+def convert_igblast(path):
+    with mp.Pool(processes=mp.cpu_count()) as pool:
+        files = glob.glob(os.path.join(path, '*.tsv'))
+        dfs = pool.map(_read_igblast_tsv, files)
 
     df = pd.concat(dfs)
     df['v_call'] = df['v_call'].str.split('*').str[0]
     df['j_call'] = df['j_call'].str.split('*').str[0]
 
-    meta_keys = metadata.groupdict().keys()
     df['copies'] = 1
 
     df = (
@@ -256,7 +260,7 @@ def convert_igblast(path, metadata_regex=DEFAULT_METADATA_REGEX):
                 'junction_aa',
                 'productive',
                 'junction_length',
-                *meta_keys,
+                *DEFAULT_METADATA_REGEX.groupindex.keys()
             ]
         )
         .agg(
@@ -279,7 +283,7 @@ def convert_igblast(path, metadata_regex=DEFAULT_METADATA_REGEX):
         'v_identity': 'avg_v_identity',
         'copies': 'copies',
         'replicate_name': 'replicate_name',
-        **{k: k for k in meta_keys},
+        **{k: k for k in DEFAULT_METADATA_REGEX.groupindex.keys()},
     }
     df = df[remaps.keys()].rename(remaps, axis=1)
     df['METADATA_replicate_number'] = df['METADATA_replicate_number'].astype(

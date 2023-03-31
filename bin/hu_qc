@@ -28,31 +28,31 @@ if __name__ == '__main__':
         else:
             shutil.rmtree(args.output)
             hu.logger.info(f'Deleted directory {args.output}')
+
     hu.logger.info(f'Creating output directory {args.output}')
     os.makedirs(args.output)
 
     hu.logger.info(f'Loading data from {", ".join(args.directories)}')
     df = pd.concat([hu.io.convert_igblast(d) for d in args.directories])
 
-    subject_colors = dict(zip(df.subject.unique(), sns.color_palette()))
-
     # Clone counts
     hu.logger.info('Plotting clone sizes')
     pdf = (
-        df.groupby(['subject', 'replicate_name'])
-        .clone_id.nunique()
+        df.groupby('replicate_name')
+        .clone_id
+        .nunique()
         .to_frame()
         .reset_index()
-        .sort_values('subject')
+        .sort_values('replicate_name')
     )
 
     g = sns.catplot(
         data=pdf,
         x='replicate_name',
         y='clone_id',
-        hue='subject',
-        palette=subject_colors,
         kind='bar',
+        height=8,
+        aspect=2
     )
     g.axes[0][0].set_xticklabels(g.axes[0][0].get_xticklabels(), rotation=90)
     hu.io.save_fig_and_data('clone_size', pdf, path=args.output)
@@ -63,9 +63,11 @@ if __name__ == '__main__':
         try:
             g, pdf = hu.plots.plot_similarity(
                 df,
-                ['subject', 'replicate_name'],
+                ['replicate_name'],
                 metric,
                 clone_features='cdr3_aa',
+                figsize=(35, 35),
+                cutoff_func=lambda df: df.stack().std() * 3,
             )
             hu.io.save_fig_and_data(
                 f'similarity_{metric}', pdf, path=args.output
@@ -84,16 +86,12 @@ if __name__ == '__main__':
             overlapping_features=['cdr3_aa'],
             scale='log',
             col_order=lambda s: sorted(s.columns),
+            figsize=(30, 30)
         )
-        hu.io.save_fig_and_data('overlap_string', pdf, path=args.output)
+        hu.io.save_fig_and_data(
+            'overlap_string', pdf, path=args.output, ext='png'
+        )
     except IndexError:
         hu.logger.warning(
             'Similarity not calculated as there was only one replicate'
         )
-
-    # VH usage
-    hu.logger.info('Plotting VH usage')
-    g, pdf = hu.plots.plot_gene_frequency(
-        df, ['subject'], 'v_gene', size_metric='clones', by='subject'
-    )
-    hu.io.save_fig_and_data('v_usage', pdf, path=args.output)

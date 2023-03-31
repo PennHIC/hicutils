@@ -162,6 +162,18 @@ def test_overlap_strings(only_overlapping, overlapping_features, scale,
 
 
 @pytest.mark.parametrize(
+    'dist_func_name',
+    ['cosine', 'jaccard']
+)
+def test_similarity(dist_func_name):
+    path = f'tests/expected/similarity_{dist_func_name}'
+    g, pdf = plots.plot_similarity(DF, POOL, dist_func_name,
+                                   clone_features='cdr3_aa')
+    is_expected(pdf, path + '.tsv')
+    plt.savefig(path + '.pdf', bbox_inches='tight')
+
+
+@pytest.mark.parametrize(
     'cutoff',
     [10, 20, 50]
 )
