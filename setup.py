@@ -18,5 +18,6 @@ setup(
         'hicutils.core',
         'hicutils.plots',
     ],
-    install_requires=install_requires
+    install_requires=install_requires,
+    scripts=['bin/hu_qc'],
 )
