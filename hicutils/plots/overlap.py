@@ -263,8 +263,14 @@ def plot_upset(
         return ax, cdf
 
 
-def plot_similarity(df, pool, dist_func_name, clone_features='clone_id',
-                    cutoff_func=None, **kwargs):
+def plot_similarity(
+    df,
+    pool,
+    dist_func_name,
+    clone_features='clone_id',
+    cutoff_func=None,
+    **kwargs,
+):
     '''
     Generates an UpSet plot of clonal data.  The UpSet plot may be scaled by
     clones or copies with ``size`` and the definition of a clone can be varied
@@ -336,7 +342,7 @@ def plot_similarity(df, pool, dist_func_name, clone_features='clone_id',
         col_cluster=kwargs.pop('col_cluster', False),
         cmap=kwargs.pop('cmap', 'coolwarm'),
         linewidths=kwargs.pop('linewidths', 1),
-        **kwargs
+        **kwargs,
     )
 
     g.ax_heatmap.set_xlabel('')

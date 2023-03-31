@@ -260,7 +260,7 @@ def convert_igblast(path):
                 'junction_aa',
                 'productive',
                 'junction_length',
-                *DEFAULT_METADATA_REGEX.groupindex.keys()
+                *DEFAULT_METADATA_REGEX.groupindex.keys(),
             ]
         )
         .agg(

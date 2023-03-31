@@ -39,8 +39,7 @@ if __name__ == '__main__':
     hu.logger.info('Plotting clone sizes')
     pdf = (
         df.groupby('replicate_name')
-        .clone_id
-        .nunique()
+        .clone_id.nunique()
         .to_frame()
         .reset_index()
         .sort_values('replicate_name')
@@ -52,7 +51,7 @@ if __name__ == '__main__':
         y='clone_id',
         kind='bar',
         height=8,
-        aspect=2
+        aspect=2,
     )
     g.axes[0][0].set_xticklabels(g.axes[0][0].get_xticklabels(), rotation=90)
     hu.io.save_fig_and_data('clone_size', pdf, path=args.output)
@@ -86,7 +85,7 @@ if __name__ == '__main__':
             overlapping_features=['cdr3_aa'],
             scale='log',
             col_order=lambda s: sorted(s.columns),
-            figsize=(30, 30)
+            figsize=(30, 30),
         )
         hu.io.save_fig_and_data(
             'overlap_string', pdf, path=args.output, ext='png'
