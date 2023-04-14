@@ -23,7 +23,6 @@ if __name__ == '__main__':
     parser.add_argument('--sim-std-cut', type=float, default=3)
     parser.add_argument('--sim-size', type=int, default=35)
     args = parser.parse_args()
-    print(args)
 
     if os.path.isdir(args.output):
         if not args.overwrite:
