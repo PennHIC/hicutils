@@ -15,14 +15,21 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser('Run quality control on IgBLAST output')
     parser.add_argument('directories', nargs='+')
     parser.add_argument('--output', default='./output')
-    parser.add_argument('--delete', action='store_true', default=False)
+    parser.add_argument('--overwrite', action='store_true', default=False)
+
+    parser.add_argument('--clone-features', type=str, nargs='+',
+                        default=['cdr3_aa'])
+
+    parser.add_argument('--sim-std-cut', type=float, default=3)
+    parser.add_argument('--sim-size', type=int, default=35)
     args = parser.parse_args()
+    print(args)
 
     if os.path.isdir(args.output):
-        if not args.delete:
+        if not args.overwrite:
             hu.logger.error(
                 f'Directory {args.output} already exists.  Manually delete'
-                'or pass the "--delete" flag'
+                'or pass the "--overwrite" flag'
             )
             sys.exit()
         else:
@@ -53,6 +60,7 @@ if __name__ == '__main__':
         height=8,
         aspect=2,
     )
+    g.set(xlabel='Replicate', ylabel='# Clones')
     g.axes[0][0].set_xticklabels(g.axes[0][0].get_xticklabels(), rotation=90)
     hu.io.save_fig_and_data('clone_size', pdf, path=args.output)
 
@@ -64,9 +72,9 @@ if __name__ == '__main__':
                 df,
                 ['replicate_name'],
                 metric,
-                clone_features='cdr3_aa',
-                figsize=(35, 35),
-                cutoff_func=lambda df: df.stack().std() * 3,
+                clone_features=args.clone_features,
+                figsize=(args.sim_size, args.sim_size),
+                cutoff_func=lambda df: df.stack().std() * args.sim_std_cut,
             )
             hu.io.save_fig_and_data(
                 f'similarity_{metric}', pdf, path=args.output
@@ -82,7 +90,7 @@ if __name__ == '__main__':
         g, pdf = hu.plots.plot_strings(
             df,
             'replicate_name',
-            overlapping_features=['cdr3_aa'],
+            overlapping_features=args.clone_features,
             scale='log',
             col_order=lambda s: sorted(s.columns),
             figsize=(30, 30),
