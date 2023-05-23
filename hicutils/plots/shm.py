@@ -17,7 +17,7 @@ def _get_shm(pdf, df, pool, size_metric):
 
 
 def plot_shm_distribution(
-    df, pool, size_metric, palette=None, order=None, **kwargs
+    df, pool, size_metric, palette=None, hue_order=None, **kwargs
 ):
     '''
     Plots the SHM distribution of a pooled DataFrame using either clones,
@@ -42,9 +42,7 @@ def plot_shm_distribution(
 
     assert size_metric in ('clones', 'copies', 'uniques')
     df = df.copy()
-    if order:
-        df['order'] = df[pool].apply(order.index)
-        df = df.sort_values('order').drop('order', axis=1)
+
     df = _add_counts(df, pool)
     df['shm'] = df['shm'].round()
     df = (
@@ -60,6 +58,13 @@ def plot_shm_distribution(
             for feature, color in palette.items():
                 if label.rsplit('(')[0].strip() == feature.strip():
                     final_colors[label] = color
+    if hue_order:
+        pool_with_counts = {p.rsplit(' ', 1)[0]: p for p in df[pool].unique()}
+        hue_order = [
+            pool_with_counts[hue]
+            for hue in hue_order
+            if hue in pool_with_counts
+        ]
 
     with sns.plotting_context('poster'):
         g = sns.relplot(
@@ -68,6 +73,7 @@ def plot_shm_distribution(
             y='size',
             hue=pool,
             kind='line',
+            hue_order=hue_order,
             height=kwargs.pop('height', 8),
             aspect=kwargs.pop('aspect', 1.5),
             palette=final_colors,
@@ -134,7 +140,7 @@ def _sort_buckets(buckets):
     ]
 
 
-def plot_shm_range(df, pool, buckets=(1, 10, 25), **kwargs):
+def plot_shm_range(df, pool, buckets=(1, 10, 25), order=None, **kwargs):
     '''
     Plot the range of clonal SHM for each pool.
 
@@ -163,6 +169,10 @@ def plot_shm_range(df, pool, buckets=(1, 10, 25), **kwargs):
     df['shm_bucket'] = df['shm'].apply(_get_bucket, buckets=buckets)
     df = df.groupby(pool).apply(_clone_frac_norm).unstack()['clone_id']
     df = df[[df.columns[i] for i in _sort_buckets(list(df.columns))]]
+
+    if order:
+        df = df.reindex([o for o in order if o in df.index])
+
     with sns.plotting_context('poster'):
         g = df.plot.bar(
             stacked=True,
