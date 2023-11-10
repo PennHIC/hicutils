@@ -7,7 +7,7 @@ from .clone_size import (  # noqa: F401
 from .overlap import (  # noqa: F401
     plot_strings,
     plot_upset,
-    plot_similarity_heatmap
+    plot_similarity_heatmap,
 )
 from .gene_usage import (  # noqa: F401
     plot_gene_heatmap,
@@ -23,5 +23,5 @@ from .shm import (  # noqa: F401
     plot_shm_distribution,
     plot_shm_aggregate,
     plot_shm_range,
-    plot_mutated_fraction
+    plot_mutated_fraction,
 )

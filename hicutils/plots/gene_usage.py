@@ -57,8 +57,13 @@ def plot_gene_heatmap(
     total_clones = df.groupby(pool).clone_id.nunique()
     pdf.index = [f'{c} ({int(total_clones.loc[c])})' for c in pdf.index]
 
-    g = basic_clustermap(pdf, normalize_by, cluster_by,
-                         min_frequency=min_frequency,figsize=figsize)
+    g = basic_clustermap(
+        pdf,
+        normalize_by,
+        cluster_by,
+        min_frequency=min_frequency,
+        figsize=figsize,
+    )
     return g, pdf
 
 
