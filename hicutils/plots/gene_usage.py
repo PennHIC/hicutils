@@ -8,6 +8,7 @@ def plot_gene_heatmap(
     df,
     pool,
     gene,
+    min_frequency=0,
     size_metric='clones',
     normalize_by='rows',
     cluster_by='both',
@@ -25,6 +26,9 @@ def plot_gene_heatmap(
         The pooling column to use for each row of the heatmap.
     gene : str (``v_gene`` or ``j_gene``)
         The gene to plot. Must be either ``v_gene`` or ``j_gene``.
+    min_frequency : float
+        The minimum frequency across all pools allowed to be included in the
+        heatmap.
     size_metric : str
         The size metric which is plotted as the intensity of each cell.  Must
         be one of ``clones``, ``copies``, or ``uniques``.
@@ -53,7 +57,8 @@ def plot_gene_heatmap(
     total_clones = df.groupby(pool).clone_id.nunique()
     pdf.index = [f'{c} ({int(total_clones.loc[c])})' for c in pdf.index]
 
-    g = basic_clustermap(pdf, normalize_by, cluster_by, figsize)
+    g = basic_clustermap(pdf, normalize_by, cluster_by,
+                         min_frequency=min_frequency,figsize=figsize)
     return g, pdf
 
 

@@ -25,6 +25,7 @@ def plot_strings(
     row_order=None,
     order=None,
     pivot_hook=None,
+    col_namer=lambda c: c,
     **kwargs,
 ):
     '''
@@ -90,7 +91,6 @@ def plot_strings(
     pdf = df.pivot_table(
         index='label', columns=pool, values='copies', aggfunc=np.sum
     ).fillna(0)
-
     if len(pdf.columns) < 2:
         raise IndexError('Overlap plots must have at least two columns')
 
@@ -121,7 +121,9 @@ def plot_strings(
     else:
         pdf = pdf.reindex((pdf / pdf).sort_values(list(pdf.columns)).index)
 
-    pdf.columns = [f'{c} ({col_clone_counts[c]:.0f})' for c in pdf.columns]
+    pdf.columns = [
+        f'{col_namer(c)} ({col_clone_counts[c]:.0f})' for c in pdf.columns
+    ]
     ret_df = pdf.copy()
 
     if scale == 'log':
@@ -264,7 +266,32 @@ def plot_upset(
         return ax, cdf
 
 
-def plot_similarity(
+def _get_similarity(df, pool, dist_func_name, clone_features):
+    assert dist_func_name in ('jaccard', 'cosine')
+    use_size = 'clones' if dist_func_name == 'jaccard' else 'copies'
+
+    pdf = df.pivot_table(
+        index=pool, columns=clone_features, values=use_size, aggfunc=np.sum
+    ).fillna(0)
+
+    total_clones = (pdf / pdf).sum(axis=1)
+    pdf.index = [
+        '{} ({})'.format(c, int(total_clones.loc[c])) for c in pdf.index
+    ]
+    sim = {}
+    dist_func = getattr(distance, dist_func_name)
+    for s1, s2 in list(itertools.combinations(pdf.index, 2)):
+        fsim = 1 - dist_func(pdf.loc[s1], pdf.loc[s2])
+        sim.setdefault(s1, {})[s2] = sim.setdefault(s2, {})[s1] = round(fsim, 3)
+
+    sim = pd.DataFrame(sim)
+    sim = sim[sim.index]
+    if len(sim) < 2:
+        raise IndexError('Similarity matrix only has one value.')
+    return sim
+
+
+def plot_similarity_heatmap(
     df,
     pool,
     dist_func_name,
@@ -304,33 +331,11 @@ def plot_similarity(
 
     '''
 
-    assert dist_func_name in ('jaccard', 'cosine')
-    use_size = 'clones' if dist_func_name == 'jaccard' else 'copies'
-
-    pdf = df.pivot_table(
-        index=pool, columns=clone_features, values=use_size, aggfunc=np.sum
-    ).fillna(0)
-
-    total_clones = (pdf / pdf).sum(axis=1)
-    pdf.index = [
-        '{} ({})'.format(c, int(total_clones.loc[c])) for c in pdf.index
-    ]
-    sim = {}
-    dist_func = getattr(distance, dist_func_name)
-    for s1, s2 in list(itertools.combinations(pdf.index, 2)):
-        fsim = 1 - dist_func(pdf.loc[s1], pdf.loc[s2])
-        sim.setdefault(s1, {})[s2] = sim.setdefault(s2, {})[s1] = round(fsim, 3)
-
-    sim = pd.DataFrame(sim)
-    sim = sim[sim.index]
+    sim = _get_similarity(df, pool, dist_func_name, clone_features)
     mask = sim.isna()
     sim = sim.fillna(0)
-    if len(sim) < 2:
-        raise IndexError('Similarity matrix only has one value.')
-
-    sim = sim[list(sorted(sim.columns))].reindex(sorted(sim.index))
-
     ret_df = sim = sim[list(sorted(sim.columns))].reindex(sorted(sim.index))
+
     if cutoff_func:
         sim = sim.copy()
         cutoff = cutoff_func(sim)

@@ -191,3 +191,83 @@ def plot_shm_range(df, pool, buckets=(1, 10, 25), order=None, **kwargs):
         )
 
     return g, df
+
+
+def plot_most_mutated_pie(df, pool, colors, **kwargs):
+    '''
+    Plots the most mutated ``pool`` in ``df`` as a pie chart.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame used to plot the SHM.
+    pool : str
+        The pool to use for plotting.
+
+    Returns
+    -------
+    A tuple ``(g, df)`` where ``g`` is a handle to the plot and ``df`` is the
+    underlying DataFrame.
+
+    '''
+
+    pdf = df.pivot_table(
+        index='clone_id',
+        columns=pool,
+        values='shm',
+        aggfunc=np.mean,
+    )
+
+    pdf['max_shm'] = pdf.apply(
+        lambda r: 'Equal' if all(c == r[0] for c in r) else r.idxmax(), axis=1
+    )
+    pdf = pdf.max_shm.value_counts(normalize=True)
+    g = pdf.plot.pie(
+        colors=[colors[by] for c in pdf.index],
+        autopct=kwargs.get('autopct', '%1.1f%%'),
+        pctdistance=kwargs.get('pctdistance', 0.5),
+        wedgeprops=kwargs.pop('wedgeprops', dict(width=0.4)),
+    )
+
+    return g, pdf
+
+
+def plot_mutated_fraction(df, pool, threshold=2.0, **kwargs):
+    '''
+    Plots the fraction of clones with greater than ``threshold`` SHM in each
+    pool.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame used to plot the SHM.
+    pool : str
+        The pool to use for plotting.
+    threshold : float
+        The SHM percentage threshold to use to determine if a clone is mutated.
+
+    Returns
+    -------
+    A tuple ``(g, df)`` where ``g`` is a handle to the plot and ``df`` is the
+    underlying DataFrame.
+
+    '''
+    df = df.copy()
+    df['is_mutated'] = df['shm'] < threshold
+    pdf = (
+        df
+        .groupby(pool)
+        .is_mutated
+        .mean()
+        .to_frame()
+        .reset_index()
+    )
+    g = sns.catplot(
+        data=pdf,
+        x=pool,
+        y='is_mutated',
+        kind='bar',
+        **kwargs
+    )
+    g.set(xlabel='', ylabel=f'Fraction of clones > {threshold}% VH Mutation')
+    return g, pdf
