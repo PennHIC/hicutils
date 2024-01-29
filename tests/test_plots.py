@@ -45,7 +45,7 @@ def test_cdr3_logo(by, length):
 def test_cdr3_spectratype(color_top):
     path = f'tests/expected/spectratype_{color_top}'
     g, pdf = plots.plot_cdr3_spectratype(DF, color_top=color_top)
-    pdf = pdf.replace('', np.nan)
+    pdf = pdf.replace('', np.nan).sort_values('cdr3_num_nts')
     is_expected(pdf, path + '.tsv')
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
@@ -114,6 +114,7 @@ def test_shm_distribution(size_metric):
 def test_shm_aggregate():
     path = 'tests/expected/shm_aggregate'
     g, pdf = plots.plot_shm_aggregate(DF, POOL)
+    pdf = pdf.sort_values('clone_id')
     is_expected(pdf, path + '.tsv')
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
@@ -180,6 +181,7 @@ def test_similarity(dist_func_name):
 def test_top_clones(cutoff):
     path = f'tests/expected/top_clones_{cutoff}'
     g, pdf = plots.plot_top_clones(DF, cutoff=cutoff)
+    pdf = pdf.sort_values('clone_id')
     is_expected(pdf, path + '.tsv')
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
