@@ -14586,14 +14586,41 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
     </script>
     <!-- End of mathjax configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">hicutils</span> <span class="k">as</span> <span class="nn">hu</span>
+</pre></div>
 
+     </div>
+</div>
+</div>
+</div>
+
+</div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Downloading-from-an-ImmuneDB-Link">Downloading from an ImmuneDB Link<a class="anchor-link" href="#Downloading-from-an-ImmuneDB-Link">&#182;</a></h2><p>For a hosted ImmuneDB instance, you can directly download and load data from the website link. Depending on the database size, initially gathering the data may take some time.  After it is downloaded, the cached version will be used unless the data is explicitly deleted.</p>
+<h2 id="Importing-from-existing-replicate-files-and-associated-metadata-file">Importing from existing replicate files and associated metadata file<a class="anchor-link" href="#Importing-from-existing-replicate-files-and-associated-metadata-file">&#182;</a></h2>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Finally you can load individual replicate files so long as their is an associated metadata file with the column <code>replicate_name</code> and then metadata for each file. For example, here are the files:</p>
 
 </div>
 </div>
@@ -14603,16 +14630,64 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">hicutils</span> <span class="k">as</span> <span class="nn">hu</span>
+<div class=" highlight hl-ipython3"><pre><span></span>%%bash
+ls example_data_immunedb
+</pre></div>
 
-<span class="n">hu</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">pull_immunedb_data</span><span class="p">(</span>
-    <span class="s1">&#39;https://myurl.com/immunedb&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;mydb&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;example_data_immunedb&#39;</span>
-<span class="p">)</span>
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>HPAP015.IgH_HPAP015_rep1_200p0ng.pooled.tsv
+HPAP015.IgH_HPAP015_rep2_200p0ng.pooled.tsv
+HPAP017.IgH_HPAP017_rep1_200p0ng.pooled.tsv
+HPAP017.IgH_HPAP017_rep2_200p0ng.pooled.tsv
+metadata.tsv
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Given this, to load this directory run:</p>
+
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">hu</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_directory</span><span class="p">(</span><span class="s1">&#39;example_data_immunedb&#39;</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -14628,7 +14703,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[1]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
 
 
 
@@ -15372,18 +15447,7 @@ HPAP017.Control.pooled.tsv
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Importing-from-existing-replicate-files-and-associated-metadata-file">Importing from existing replicate files and associated metadata file<a class="anchor-link" href="#Importing-from-existing-replicate-files-and-associated-metadata-file">&#182;</a></h2>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Finally you can load individual replicate files so long as their is an associated metadata file with the column <code>replicate_name</code> and then metadata for each file. For example, here are the files:</p>
+<h2 id="Downloading-from-an-ImmuneDB-Link-(Slow-for-large-datasets)">Downloading from an ImmuneDB Link (Slow for large datasets)<a class="anchor-link" href="#Downloading-from-an-ImmuneDB-Link-(Slow-for-large-datasets)">&#182;</a></h2><p>For a hosted ImmuneDB instance, you can directly download and load data from the website link. Depending on the database size, initially gathering the data may take some time.  After it is downloaded, the cached version will be used unless the data is explicitly deleted.</p>
 
 </div>
 </div>
@@ -15393,66 +15457,14 @@ HPAP017.Control.pooled.tsv
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span>%%bash
-ls example_data_immunedb
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>HPAP015.IgH_HPAP015_rep1_200p0ng.pooled.tsv
-HPAP015.IgH_HPAP015_rep2_200p0ng.pooled.tsv
-HPAP017.IgH_HPAP017_rep1_200p0ng.pooled.tsv
-HPAP017.IgH_HPAP017_rep2_200p0ng.pooled.tsv
-metadata.tsv
-</pre>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>And here is the example metadata file (<strong>this is just to show the file, you should not actually run this command</strong>):</p>
-
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-
-<span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;example_data_immunedb/metadata.tsv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">hu</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">pull_immunedb_data</span><span class="p">(</span>
+    <span class="s1">&#39;https://myurl.com/immunedb&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;mydb&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;example_data_immunedb&#39;</span>
+<span class="p">)</span>
 </pre></div>
 
      </div>
@@ -15468,198 +15480,7 @@ metadata.tsv
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
-
-
-
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>replicate_name</th>
-      <th>aab</th>
-      <th>aab_summary</th>
-      <th>age</th>
-      <th>age_units</th>
-      <th>biological_sample</th>
-      <th>comments</th>
-      <th>date_sample_received</th>
-      <th>disease</th>
-      <th>dq8_call</th>
-      <th>...</th>
-      <th>sequencing_date</th>
-      <th>sequencing_type</th>
-      <th>species</th>
-      <th>umi</th>
-      <th>gad</th>
-      <th>ia2</th>
-      <th>iaa</th>
-      <th>znt8</th>
-      <th>date_hic_received</th>
-      <th>collapse_name</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>IgH_HPAP015_rep1_200p0ng</td>
-      <td>1</td>
-      <td>yes</td>
-      <td>29</td>
-      <td>years</td>
-      <td>HPAP015</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>T1D</td>
-      <td>yes</td>
-      <td>...</td>
-      <td>2019-08-05</td>
-      <td>Bulk</td>
-      <td>human</td>
-      <td>0</td>
-      <td>neg</td>
-      <td>neg</td>
-      <td>pos</td>
-      <td>neg</td>
-      <td>2019-07-31</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>IgH_HPAP015_rep2_200p0ng</td>
-      <td>1</td>
-      <td>yes</td>
-      <td>29</td>
-      <td>years</td>
-      <td>HPAP015</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>T1D</td>
-      <td>yes</td>
-      <td>...</td>
-      <td>2019-08-05</td>
-      <td>Bulk</td>
-      <td>human</td>
-      <td>0</td>
-      <td>neg</td>
-      <td>neg</td>
-      <td>pos</td>
-      <td>neg</td>
-      <td>2019-07-31</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>IgH_HPAP017_rep1_200p0ng</td>
-      <td>1</td>
-      <td>yes</td>
-      <td>30</td>
-      <td>years</td>
-      <td>HPAP017</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>Control</td>
-      <td>no</td>
-      <td>...</td>
-      <td>2019-08-05</td>
-      <td>Bulk</td>
-      <td>human</td>
-      <td>0</td>
-      <td>pos</td>
-      <td>neg</td>
-      <td>neg</td>
-      <td>neg</td>
-      <td>2019-07-31</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>IgH_HPAP017_rep2_200p0ng</td>
-      <td>1</td>
-      <td>yes</td>
-      <td>30</td>
-      <td>years</td>
-      <td>HPAP017</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>Control</td>
-      <td>no</td>
-      <td>...</td>
-      <td>2019-08-05</td>
-      <td>Bulk</td>
-      <td>human</td>
-      <td>0</td>
-      <td>pos</td>
-      <td>neg</td>
-      <td>neg</td>
-      <td>neg</td>
-      <td>2019-07-31</td>
-      <td>NaN</td>
-    </tr>
-  </tbody>
-</table>
-<p>4 rows × 27 columns</p>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Given this, to load this directory run:</p>
-
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">hu</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_directory</span><span class="p">(</span><span class="s1">&#39;example_data_immunedb&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[1]:</div>
 
 
 

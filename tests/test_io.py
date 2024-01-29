@@ -5,15 +5,15 @@ from .expected import is_expected
 
 
 @pytest.mark.parametrize(
-    'path,features',
+    'path',
     [
-        ('tests/input', 'disease'),
+        'tests/input',
     ]
 )
-def test_read_tsvs(path, features):
-    df = io.read_tsvs(path, features)
+def test_read_tsvs(path):
+    df = io.read_directory(path)
     is_expected(df, 'tests/expected/io_test.tsv')
-    mdf = metadata.make_metadata_table(df, 'disease').reset_index()
+    mdf = metadata.make_metadata_table(df, 'METADATA_disease').reset_index()
     is_expected(mdf, 'tests/expected/metadata.tsv')
 
 

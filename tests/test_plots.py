@@ -10,7 +10,7 @@ from .expected import is_expected
 
 
 POOL = 'subject'
-DF = io.read_tsvs('tests/input', 'disease')
+DF = io.read_directory('tests/input')
 
 
 @pytest.mark.parametrize(
@@ -199,7 +199,7 @@ def test_d_index(cutoff):
     'pool_by,size,clone_features',
     [
         ('subject', 'clones', 'clone_id'),
-        ('disease', 'copies', 'cdr3_aa')
+        ('METADATA_disease', 'copies', 'cdr3_aa')
     ]
 )
 def test_upset(pool_by, size, clone_features):
