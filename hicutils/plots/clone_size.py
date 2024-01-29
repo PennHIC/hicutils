@@ -93,7 +93,7 @@ def plot_top_clones(
     if isinstance(annotate, str):
         annotate = [annotate]
     df = df.copy()
-    df = df.sort_values('copies', ascending=False)
+    df = df.sort_values(['copies', 'clone_id'], ascending=False)
     df['copies_percent'] = 100 * df['copies'] / df['copies'].sum()
     df['rank'] = np.arange(1, len(df) + 1)
 
