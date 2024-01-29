@@ -73,7 +73,7 @@ def filter_by_gene_frequency(df, min_frequency, by='subject', gene='v_gene'):
     using a V-gene with a frequency less than or equal to 0.05 in a given
     subject are removed.
 
-    df : str
+    df : pd.DataFrame
         The DataFrame to filter.
     min_frequency : float
         The minimum frequency of a gene in ``by`` that should be included.
@@ -108,7 +108,7 @@ def _overlap_pivot(df, pool):
 def filter_number_of_pools(df, pool, n, func='greater_equal', limit_to=None):
     '''
     Filters clones based on the number of pools in which it occurs.
-    df : str
+    df : pd.DataFrame
         The DataFrame to filter.
     pool : str
         The pool on which to filter.
@@ -136,3 +136,29 @@ def filter_number_of_pools(df, pool, n, func='greater_equal', limit_to=None):
     counts = (counts / counts).sum(axis=1)
     counts = set(counts[func(counts, n)].index)
     return df[df.clone_id.isin(counts)]
+
+
+def filter_by_presence(df, pool, pool_value):
+    '''
+    Filters clones based on presence in a given pool.
+
+    df : pd.DataFrame
+        The DataFrame to filter.
+    pool : str
+        The pool on which to filter.
+    pool_value : str
+        The pool value on which to filter.
+
+    Returns
+    -------
+    DataFrame filtered by number of pools.
+
+    '''
+    if pool_value not in df[pool].unique():
+        raise KeyError(f'"{pool_value}" is not a value for pool "{pool}"')
+    overlap_df = df.pivot_table(
+        index='clone_id', columns=pool, values='copies', aggfunc=np.sum
+    ).fillna(0)
+
+    clone_ids = overlap_df[overlap_df[pool_value] > 0].index
+    return df[df.clone_id.isin(clone_ids)]
