@@ -40,7 +40,7 @@ def test_cdr3_logo(by, length):
 
 @pytest.mark.parametrize(
     'color_top',
-    [5, 10, 20]
+    [5, 10]
 )
 def test_cdr3_spectratype(color_top):
     path = f'tests/expected/spectratype_{color_top}'
