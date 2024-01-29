@@ -12,7 +12,7 @@ def plot_gene_heatmap(
     size_metric='clones',
     normalize_by='rows',
     cluster_by='both',
-    figsize=(30, 10),
+    **kwargs,
 ):
     '''
     Generates a gene-usage heatmap showing the utilization of each V or J gene
@@ -62,7 +62,8 @@ def plot_gene_heatmap(
         normalize_by,
         cluster_by,
         min_frequency=min_frequency,
-        figsize=figsize,
+        figsize=kwargs.pop('figsize', (30, 10)),
+        **kwargs,
     )
     return g, pdf
 

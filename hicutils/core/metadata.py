@@ -21,6 +21,8 @@ def make_metadata_table(df, pool):
         df.groupby(pool)
         .agg(
             {
+                'subject': lambda s: s.nunique(),
+                'replicate_name': lambda s: s.nunique(),
                 'instances': np.sum,
                 'copies': np.sum,
                 'cdr3_num_nts': np.mean,
@@ -28,6 +30,13 @@ def make_metadata_table(df, pool):
             }
         )
         .rename({'instances': 'uniques'}, axis=1)
+    )
+    pdf = pdf.rename(
+        {
+            'subject': 'subjects',
+            'replicate_name': 'replicates',
+        },
+        axis=1,
     )
     pdf['in_frame'] = df.groupby(pool).apply(
         lambda d: len(d[d.functional == 'T']) / len(d)

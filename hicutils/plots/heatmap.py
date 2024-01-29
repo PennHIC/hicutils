@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 
 
 def basic_clustermap(df, normalize_by, cluster_by, min_frequency=0, **kwargs):
-    assert normalize_by in ('rows', 'cols')
+    assert normalize_by in ('rows', 'cols', None)
     assert cluster_by in ('rows', 'cols', 'both', None)
     if normalize_by == 'rows':
         df = df.div(df.sum(axis=1), axis=0)
-    else:
+    elif normalize_by == 'cols':
         df = df.div(df.sum(axis=0), axis=1)
 
     df[df < min_frequency] = np.nan
