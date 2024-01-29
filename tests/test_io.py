@@ -11,7 +11,7 @@ from .expected import is_expected
     ]
 )
 def test_read_tsvs(path):
-    df = io.read_directory(path)
+    df = io.read_directory(path).sort_values('clone_id')
     is_expected(df, 'tests/expected/io_test.tsv')
     mdf = metadata.make_metadata_table(df, 'METADATA_disease').reset_index()
     is_expected(mdf, 'tests/expected/metadata.tsv')
