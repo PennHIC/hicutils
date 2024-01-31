@@ -100,7 +100,7 @@ def read_directory(path):
 
 
 def save_fig_and_data(
-    name, df, path='./', ext='pdf', **kwargs
+    name, df, path='./', ext='pdf', fig_args=None, **kwargs
 ):  # pragma: no cover
     '''
     Saves the most recently generated figure and associated data to files.
@@ -116,6 +116,8 @@ def save_fig_and_data(
     ext : str, optional
         The extension of the figure file.  Defaults to pdf but can be any image
         format such as ``png``.
+    fig_args : dict
+        Additional parameters which will be passed to ``plt.savefig``
     kwargs : dict
         Additional parameters which will be passed to ``df.to_csv``
 
@@ -123,7 +125,7 @@ def save_fig_and_data(
 
     path = os.path.join(path, name)
     df.to_csv(f'{path}.tsv', sep='\t', **kwargs)
-    plt.savefig(f'{path}.{ext}', bbox_inches='tight')
+    plt.savefig(f'{path}.{ext}', bbox_inches='tight', **(fig_args or {}))
 
 
 def _run_job_and_get_result(prefix, route, out_name):  # pragma: no cover
