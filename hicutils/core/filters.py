@@ -162,3 +162,37 @@ def filter_by_presence(df, pool, pool_value):
 
     clone_ids = overlap_df[overlap_df[pool_value] > 0].index
     return df[df.clone_id.isin(clone_ids)]
+
+
+def remove_potential_contaminates(
+    df, pool, pool_values, clone_feature='cdr3_nt'
+):
+    '''
+    Removes clones based on ``clone_feature`` (defaults to CDR3 NT) which occur
+    in  ``pool`` with values ``pool_values``.  For example, to remove all
+    clones with CDR3 NT sequences found in subjects 'Fibroblast' and 'Water':
+
+    .. code-block:: python
+
+        remove_potential_contaminates(df, 'subject', ['Fibroblast', 'Water'])
+
+    df : pd.DataFrame
+        The DataFrame to filter.
+    pool : str
+        The pool to use for filtering.
+    pool_values : list
+        The values of ``pool`` which should be the basis of clonal exclusion.
+    clone_feature : str
+        The clone feature to use for filtering.  For example ``cdr3_nt`` (the
+        default) will use the CDR3 NT sequence as the basis for removing other
+        clones.
+
+    Returns
+    -------
+    DataFrame with clones occurring in ``pool`` with values ``pool_values``
+    excluded on the basis of ``clone_feature``.
+
+    '''
+
+    remove_values = df[df[pool].isin(pool_values)][clone_feature].unique()
+    return df[~df[clone_feature].isin(remove_values)]
