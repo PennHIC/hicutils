@@ -13,10 +13,7 @@ POOL = 'subject'
 DF = io.read_directory('tests/input')
 
 
-@pytest.mark.parametrize(
-    'size_metric',
-    ('clones', 'copies')
-)
+@pytest.mark.parametrize('size_metric', ('clones', 'copies'))
 def test_cdr3_aa_usage(size_metric):
     path = f'tests/expected/cdr3_aa_usage_{size_metric}'
     _, pdf = plots.plot_cdr3_aa_usage(DF, POOL, size_metric=size_metric)
@@ -24,13 +21,7 @@ def test_cdr3_aa_usage(size_metric):
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
 
-@pytest.mark.parametrize(
-    'by,length',
-    [
-        ('cdr3_aa', 10),
-        ('cdr3_nt', 21)
-    ]
-)
+@pytest.mark.parametrize('by,length', [('cdr3_aa', 10), ('cdr3_nt', 21)])
 def test_cdr3_logo(by, length):
     path = f'tests/expected/cdr3_logo_{by}_{length}'
     _, m = plots.plot_cdr3_logo(DF, by, length)
@@ -38,10 +29,7 @@ def test_cdr3_logo(by, length):
     plt.savefig(f'{path}.pdf', bbox_inches='tight')
 
 
-@pytest.mark.parametrize(
-    'color_top',
-    [5, 10]
-)
+@pytest.mark.parametrize('color_top', [5, 10])
 def test_cdr3_spectratype(color_top):
     path = f'tests/expected/spectratype_{color_top}'
     g, pdf = plots.plot_cdr3_spectratype(DF, color_top=color_top)
@@ -62,12 +50,13 @@ def test_cdr3_distribution():
     itertools.product(
         ['v_gene', 'j_gene'],
         ['clones', 'copies'],
-    )
+    ),
 )
 def test_gene_heatmap(gene, size_metric):
     path = f'tests/expected/gene_heatmap_{gene}_{size_metric}'
-    _, pdf = plots.plot_gene_heatmap(DF, POOL, gene, size_metric=size_metric,
-                                     figsize=(12, 6))
+    _, pdf = plots.plot_gene_heatmap(
+        DF, POOL, gene, size_metric=size_metric, figsize=(12, 6)
+    )
     is_expected(pdf, path + '.tsv')
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
@@ -77,7 +66,7 @@ def test_gene_heatmap(gene, size_metric):
     itertools.product(
         ['v_gene', 'j_gene'],
         ['clones', 'copies'],
-    )
+    ),
 )
 def test_gene_frequency(gene, size_metric):
     path = f'tests/expected/gene_frequency_{gene}_{size_metric}'
@@ -91,7 +80,7 @@ def test_gene_frequency(gene, size_metric):
     [
         (10, 100, 1000),
         (20, 50, 100, 500, 1000),
-    ]
+    ],
 )
 def test_plot_ranges(intervals):
     path = f'tests/expected/range_{"-".join([str(s) for s in intervals])}'
@@ -100,10 +89,7 @@ def test_plot_ranges(intervals):
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
 
-@pytest.mark.parametrize(
-    'size_metric',
-    ['clones', 'copies']
-)
+@pytest.mark.parametrize('size_metric', ['clones', 'copies'])
 def test_shm_distribution(size_metric):
     path = f'tests/expected/shm_distribution_{size_metric}'
     g, pdf = plots.plot_shm_distribution(DF, POOL, size_metric=size_metric)
@@ -119,13 +105,7 @@ def test_shm_aggregate():
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
 
-@pytest.mark.parametrize(
-    'buckets',
-    [
-        (1, 10, 25),
-        (1, 2, 10, 15, 20)
-    ]
-)
+@pytest.mark.parametrize('buckets', [(1, 10, 25), (1, 2, 10, 15, 20)])
 def test_shm_range(buckets):
     path = f'tests/expected/shm_range_{"-".join([str(c) for c in buckets])}'
     g, pdf = plots.plot_shm_range(DF, POOL)
@@ -140,10 +120,9 @@ def test_shm_range(buckets):
         [('cdr3_aa',), ('cdr3_aa', 'v_gene')],
         [True, False, 'log'],
         [10, 100, 500],
-    )
+    ),
 )
-def test_overlap_strings(only_overlapping, overlapping_features, scale,
-                         limit):
+def test_overlap_strings(only_overlapping, overlapping_features, scale, limit):
     path = (
         f'tests/expected/overlap_strings_'
         f'{only_overlapping}_'
@@ -156,28 +135,23 @@ def test_overlap_strings(only_overlapping, overlapping_features, scale,
         only_overlapping=only_overlapping,
         overlapping_features=overlapping_features,
         scale=scale,
-        limit=limit
+        limit=limit,
     )
     is_expected(pdf, path + '.tsv')
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
 
-@pytest.mark.parametrize(
-    'dist_func_name',
-    ['cosine', 'jaccard']
-)
+@pytest.mark.parametrize('dist_func_name', ['cosine', 'jaccard'])
 def test_similarity(dist_func_name):
     path = f'tests/expected/similarity_{dist_func_name}'
-    g, pdf = plots.plot_similarity_heatmap(DF, POOL, dist_func_name,
-                                           clone_features='cdr3_aa')
+    g, pdf = plots.plot_similarity_heatmap(
+        DF, POOL, dist_func_name, clone_features='cdr3_aa'
+    )
     is_expected(pdf, path + '.tsv')
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
 
-@pytest.mark.parametrize(
-    'cutoff',
-    [10, 20, 50]
-)
+@pytest.mark.parametrize('cutoff', [10, 20, 50])
 def test_top_clones(cutoff):
     path = f'tests/expected/top_clones_{cutoff}'
     g, pdf = plots.plot_top_clones(DF, cutoff=cutoff)
@@ -186,10 +160,7 @@ def test_top_clones(cutoff):
     plt.savefig(path + '.pdf', bbox_inches='tight')
 
 
-@pytest.mark.parametrize(
-    'cutoff',
-    [10, 20, 50]
-)
+@pytest.mark.parametrize('cutoff', [10, 20, 50])
 def test_d_index(cutoff):
     path = f'tests/expected/d_index_{cutoff}'
     g, pdf = plots.plot_d_index(DF, POOL, cutoff=cutoff)
@@ -201,12 +172,13 @@ def test_d_index(cutoff):
     'pool_by,size,clone_features',
     [
         ('subject', 'clones', 'clone_id'),
-        ('METADATA_disease', 'copies', 'cdr3_aa')
-    ]
+        ('METADATA_disease', 'copies', 'cdr3_aa'),
+    ],
 )
 def test_upset(pool_by, size, clone_features):
     path = f'tests/expected/upset_{pool_by}_{size}_{clone_features}'
-    g, pdf = plots.plot_upset(DF, pool_by, size=size,
-                              clone_features=clone_features)
+    g, pdf = plots.plot_upset(
+        DF, pool_by, size=size, clone_features=clone_features
+    )
     is_expected(pdf, path + '.tsv')
     plt.savefig(path + '.pdf', bbox_inches='tight')

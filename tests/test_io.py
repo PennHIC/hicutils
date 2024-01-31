@@ -8,7 +8,7 @@ from .expected import is_expected
     'path',
     [
         'tests/input',
-    ]
+    ],
 )
 def test_read_tsvs(path):
     df = io.read_directory(path).sort_values('clone_id')
@@ -21,7 +21,7 @@ def test_read_tsvs(path):
     'path',
     [
         'tests/input/igblast',
-    ]
+    ],
 )
 def test_convert_igblast(path):
     df = io.convert_igblast(path)
