@@ -6,7 +6,7 @@ import seaborn as sns
 import upsetplot as usp
 from scipy.spatial import distance
 
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 
 def _sort_presence(df):
@@ -26,6 +26,7 @@ def plot_strings(
     order=None,
     pivot_hook=None,
     col_namer=lambda c: c,
+    highlight=None,
     **kwargs,
 ):
     '''
@@ -72,6 +73,34 @@ def plot_strings(
     pivot_hook : function or None
         A function to call on the pivoted table.  Useful for filtering
         sequences based on their frequency across pools.
+    col_namer : function
+        A function to rename columns.  The function should accept a tuple and
+        return a formatted string version.
+    highlight : list or function
+        A list of two-value tuples in the format `[(color_hex, [indices],
+        ...]` to highlight.  Each item in the list specifies a color to use and
+        the row indices to highlight with the color.  The highlights are
+        applied in order, so row indices which occur multiple times are colored
+        by the last item in the list.
+
+        The indices should be match the format specified in `clone_features`.
+
+        Alternatively, a function can be passed which returns an array
+        formatted as described and shown above.
+
+        For example, the following will color the CDR3 `CARAFDHW` in red and
+        `CARESLRFMDVW` in green:
+
+
+    .. code-block:: python
+
+        [
+            ('#ff0000', ['CARAFDHW']),
+            ('#00ff00', ['CARESLRFMDVW']),
+        ]
+
+
+
 
     Returns
     -------
@@ -82,6 +111,9 @@ def plot_strings(
     '''
     assert ylabels in ('counts', 'full')
     assert scale in (False, True, 'log')
+    assert not (
+        scale and highlight
+    ), 'Cannot specify `highlight` when scaling plot.'
 
     df = df.copy()
     df['label'] = df[list(overlapping_features)].apply(
@@ -121,6 +153,14 @@ def plot_strings(
     else:
         pdf = pdf.reindex((pdf / pdf).sort_values(list(pdf.columns)).index)
 
+    if highlight:
+        if callable(highlight):
+            highlight_rows = highlight(pdf)
+        else:
+            highlight_rows = highlight
+    else:
+        highlight_rows = []
+
     pdf.columns = [
         f'{col_namer(c)} ({col_clone_counts[c]:.0f})' for c in pdf.columns
     ]
@@ -139,8 +179,13 @@ def plot_strings(
             colors=['#2b8cbe', '#e0f3db', '#fdbb84'],
         )
     else:
-        pal = sns.diverging_palette(10, 240, s=95, sep=1, as_cmap=True)
         pdf /= pdf
+
+        pal = ListedColormap(
+            ['#000000', '#1f77b4', *[r[0] for r in highlight_rows]]
+        )
+        for i, (color, rows) in enumerate(highlight_rows, start=2):
+            pdf.loc[rows, :] = (pdf.loc[rows, :] / pdf.loc[rows, :]) * i
 
     with sns.axes_style('darkgrid'):
         g = sns.clustermap(
@@ -150,7 +195,7 @@ def plot_strings(
             row_cluster=False,
             col_cluster=False,
             vmin=pdf.min().min() if scale else 0,
-            vmax=pdf.max().max() if scale else 1,
+            vmax=pdf.max().max(),
             cbar_pos=(0, 0.25, 0.03, 0.4),
             dendrogram_ratio=(0.2, 0.01) if scale else (0.01, 0.01),
             cbar_kws={
