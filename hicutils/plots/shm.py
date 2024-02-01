@@ -256,5 +256,5 @@ def plot_mutated_fraction(df, pool, threshold=2.0, **kwargs):
     df['is_mutated'] = df['shm'] >= threshold
     pdf = df.groupby(pool).is_mutated.mean().to_frame().reset_index()
     g = sns.catplot(data=pdf, x=pool, y='is_mutated', kind='bar', **kwargs)
-    g.set(xlabel='', ylabel=f'Fraction of clones > {threshold}% VH Mutation')
+    g.set(xlabel='', ylabel=f'Fraction of clones >= {threshold}% VH Mutation')
     return g, pdf
