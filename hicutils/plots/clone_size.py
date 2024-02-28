@@ -7,6 +7,41 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def plot_clone_counts(df, pool, **kwargs):
+    '''
+    Plots the number of clones per ``pool``.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame used to plot the clone size distribution.
+    pool : str
+        The field on which to pool.
+
+    Returns
+    -------
+    A tuple ``(g, df)`` where ``g`` is a handle to the plot and ``df`` is the
+    underlying DataFrame.
+
+    '''
+    clone_count_per_pool = (
+        df.groupby(pool)
+        .clone_id.nunique()
+        .to_frame()
+        .reset_index()
+        .rename({'clone_id': 'clones'}, axis=1)
+    )
+    g = sns.catplot(
+        data=clone_count_per_pool,
+        x=pool,
+        y='clones',
+        kind=kwargs.pop('kind', 'bar'),
+        **kwargs,
+    )
+    g.set(xlabel='', ylabel='# Clones')
+    return g, clone_count_per_pool
+
+
 def plot_clone_sizes(df, cutoff=None, **kwargs):
     '''
     Plots the distribution of clone sizes in ``df``.
