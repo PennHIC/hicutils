@@ -13,6 +13,13 @@ POOL = 'subject'
 DF = io.read_directory('tests/input')
 
 
+def test_clone_counts():
+    path = f'tests/expected/clone_counts'
+    _, pdf = plots.plot_clone_counts(DF, POOL)
+    is_expected(pdf, path + '.tsv')
+    plt.savefig(path + '.pdf', bbox_inches='tight')
+
+
 @pytest.mark.parametrize('size_metric', ('clones', 'copies'))
 def test_cdr3_aa_usage(size_metric):
     path = f'tests/expected/cdr3_aa_usage_{size_metric}'

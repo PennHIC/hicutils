@@ -1,4 +1,5 @@
 from .clone_size import (  # noqa: F401
+    plot_clone_counts,
     plot_clone_sizes,
     plot_top_clones,
     plot_ranges,
